@@ -1,0 +1,1 @@
+docker run -p 8000:8000 --mount type=bind,source=C:\Users\michi\source\repos\gruene\vota-web-frontend\casdoor\conf,target=/conf --mount type=bind,source=C:\Users\michi\source\repos\gruene\vota-web-frontend\casdoor\db,target=/db casbin/casdoor:latest
