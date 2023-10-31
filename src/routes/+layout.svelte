@@ -1,6 +1,7 @@
 <script lang="ts">
 import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
+	import { firebaseAuth } from "../services/firebase";
 import { userStore } from "../stores/userStore";
 import type { UserState } from "../types/userState";
 
@@ -24,7 +25,10 @@ if(browser) {
       <a class="navbar-brand" href={homeLink}>VOTA Web</a>
       {#if userState?.isLoggedIn}
       <div class="user-info">
+            <small>
             Angemeldet als { userState?.user?.displayName ?? userState.user?.email}
+            </small>
+            <button on:click={() => firebaseAuth.signOut()}>Abmelden</button>
       </div>
       {/if}
     </div>
