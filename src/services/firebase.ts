@@ -18,11 +18,13 @@ const firebaseAuth = getAuth(firebaseApp);
 
 
 firebaseAuth.onAuthStateChanged((user) => {
-  userStore.set({
-    isLoggedIn: user !== null,
-    user,
-    initialized: true,
-  });
+  if (userStore) {
+    userStore.set({
+      isLoggedIn: user !== null,
+      user,
+      initialized: true,
+    });
+  }
 });
 
 export { firebaseApp, firebaseAuth };

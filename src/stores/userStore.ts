@@ -6,5 +6,4 @@ export const userStore = writable<UserState>({
   isLoggedIn: !!firebaseAuth.currentUser,
   user: firebaseAuth.currentUser,
   initialized: !!firebaseAuth.currentUser,
-}, () => {
 });
