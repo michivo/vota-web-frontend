@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-	import { firebaseAuth } from '../firebase/firebase';
+	import { firebaseAuth } from '../services/firebase';
 	import { Button, Form, FormGroup, Input, Label } from 'sveltestrap';
 	import { goto } from '$app/navigation';
 

@@ -2,6 +2,7 @@
 import 'firebase/auth';
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth';
+import { userStore } from '../stores/userStore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyD6MJ7PQcWtramus7Mh7O7LZ5-Qav-Zy_Y",
@@ -14,5 +15,14 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const firebaseAuth = getAuth(firebaseApp);
+
+
+firebaseAuth.onAuthStateChanged((user) => {
+  userStore.set({
+    isLoggedIn: user !== null,
+    user,
+    initialized: true,
+  });
+});
 
 export { firebaseApp, firebaseAuth };

@@ -1,6 +1,10 @@
 <script>
-	import { firebaseAuth } from "../../firebase/firebase";
+	import { userStore } from "../../stores/userStore";
+
+    let userName = '';
+
+    userStore.subscribe(u => userName = u.user?.displayName ?? '');
 </script>
 <template>
-    Hallo { firebaseAuth.currentUser?.displayName }
+    Hallo { userName }!
 </template>

@@ -1,16 +1,18 @@
 <script lang="ts">
 import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
-import { firebaseAuth } from "../firebase/firebase";
+import { userStore } from "../stores/userStore";
 
 export const prerender = true;
 
 if(browser) {
-    console.error(window.location.pathname);
-    console.error(firebaseAuth.currentUser);
-    if(!firebaseAuth.currentUser && window.location.pathname !== '/') {
-        goto('/');
-    }
+    userStore.subscribe((state) => {
+        console.error('new user state: ');
+        console.error(state);
+        if(!state.isLoggedIn && state.initialized) {
+            goto('/');
+        }
+    });
 }
 </script>
 
