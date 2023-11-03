@@ -48,6 +48,8 @@
 <style lang="scss">
     $primary: rgb(115, 163, 3);
     $secondary: rgb(225, 0, 120);
+	$font-family: 'Metropolis', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	$header-color: rgb(115, 163, 3);
 
     @import "../node_modules/bootstrap/scss/bootstrap";
 	.vota-main {

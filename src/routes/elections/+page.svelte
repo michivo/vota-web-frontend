@@ -47,6 +47,15 @@
 </div>
 
 <style>
+    h1 {
+        font-weight: 900;
+        text-transform: uppercase;
+        font-style: italic;
+        width: 100%;
+        text-align: center;
+        color: var(--bs-primary);
+    }
+
     .selection-panel {
         display: grid;
         grid-template-columns: 1fr 1fr;
