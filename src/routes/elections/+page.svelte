@@ -1,92 +1,138 @@
 <script lang="ts">
-	import type { Candidate } from '../../types/candidate';
+	import { flip } from 'svelte/animate';
+    import { dndzone } from 'svelte-dnd-action';
+	import type { Candidate, CandidateList } from '../../types/candidate';
 
-    const candidates: Candidate[] = [
-        {
-            name: 'Maria Musterfrau',
-            gender: 'female'
-        },
-        {
-            name: 'John Doe',
-            gender: 'male',
-        },
-        {
-            name: 'Jane Doe',
-            gender: 'female',
-        },
-        {
-            name: 'Max Mustermann',
-            gender: 'male',
-        },
-        {
-            name: 'Frau Österreicher',
-            gender: 'female',
-        },
-        {
-            name: 'Herr Österreicher',
-            gender: 'male'
-        }
-    ]
+	const flipDurationMs = 200;
+
+	const candidates: Candidate[] = [
+		{
+			id: 1234,
+			name: 'Maria Musterfrau',
+			gender: 'female'
+		},
+		{
+			id: 1235,
+			name: 'John Doe',
+			gender: 'male'
+		},
+		{
+			id: 1236,
+			name: 'Jane Doe',
+			gender: 'female'
+		},
+		{
+			id: 1237,
+			name: 'Max Mustermann',
+			gender: 'male'
+		},
+		{
+			id: 1238,
+			name: 'Frau Österreicher',
+			gender: 'female'
+		},
+		{
+			id: 1239,
+			name: 'Herr Österreicher',
+			gender: 'male'
+		}
+	];
+
+	let board: CandidateList[] = [
+		{
+			id: 1,
+			name: 'candidates',
+			items: candidates,
+			title: 'Kandidat*innen'
+		},
+		{
+			id: 2,
+			name: 'selection',
+			items: [] as Candidate[],
+			title: 'Reihung'
+		}
+	];
+
+	function handleDndConsiderCards(cid: number, e: any) {
+        console.error('Considering');
+        console.error(cid);
+        const colIdx = board!.findIndex(c => c.id === cid);
+        board[colIdx].items = e.detail.items;
+        board = [...board];
+	}
+
+	function handleDndFinalizeCards(cid: number, e: any) {
+        console.error('Finalizing');
+        console.error(cid);
+        const colIdx = board.findIndex(c => c.id === cid);
+        board[colIdx].items = e.detail.items;
+        board = [...board];
+	}
 </script>
 
 <div>
-    <h1>Kandidat*innenauswahl</h1>
-<div class="selection-panel">
-    <div class="candidates">
-        <h2>Kandidat*innen</h2>
-        {#each candidates as candidate}
-            <div class="candidate" draggable={true}>
-                { candidate.name }
-            </div>
-        {/each}
-    </div>
-    <div class="selections">
-        <h2>Reihung</h2>
-    </div>
-    https://svelte.dev/repl/e2ef044af75c4b16b424b8219fb31fd9?version=3.59.2
-</div>
+	<h1>Kandidat*innenauswahl</h1>
+	<div class="selection-panel" use:dndzone={{items:board, flipDurationMs, type:'columns'}}>
+		{#each board as column (column.id)}
+			<div class="candidates" animate:flip={{ duration: flipDurationMs }}>
+				<h2>{column.title}</h2>
+				<div
+					class="column-content h-100"
+					use:dndzone={{ items: column.items, flipDurationMs }}
+					on:consider={(e) => handleDndConsiderCards(column.id, e)}
+					on:finalize={(e) => handleDndFinalizeCards(column.id, e)}
+				>
+					{#each column.items as item (item.id)}
+						<div class="candidate" animate:flip={{ duration: flipDurationMs }}>
+							{item.name}
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/each}
+	</div>
 </div>
 
 <style>
-    h1 {
-        font-weight: 900;
-        text-transform: uppercase;
-        font-style: italic;
-        width: 100%;
-        text-align: center;
-        color: var(--bs-primary);
-    }
+	h1 {
+		font-weight: 900;
+		text-transform: uppercase;
+		font-style: italic;
+		width: 100%;
+		text-align: center;
+		color: var(--bs-primary);
+	}
 
-    .selection-panel {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        width: 100%;
-        gap: 2rem;
-        padding: 1rem;
-    }
+	.selection-panel {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		width: 100%;
+		gap: 2rem;
+		padding: 1rem;
+	}
 
-    .candidates {
-        background-color: #eef;
-        height: 100%;
-        width: 100%;
-        border-radius: 1rem;
-        padding: 1rem;
-    }
+	.candidates {
+		background-color: #eef;
+		height: 100%;
+		width: 100%;
+		border-radius: 1rem;
+		padding: 1rem;
+	}
 
-    .candidate {
-        margin: 1rem;
-        height: 2.5rem;
-        border-radius: 1rem;
-        border: 1px solid #000;
-        vertical-align: middle;
-        padding-top: 0.3rem;
-        padding-left: 1rem;
-        background-color: #fff;
-    }
+	.candidate {
+		margin: 1rem;
+		height: 2.5rem;
+		border-radius: 1rem;
+		border: 1px solid #000;
+		vertical-align: middle;
+		padding-top: 0.3rem;
+		padding-left: 1rem;
+		background-color: #fff;
+	}
 
-    .selections {
-        background-color: #efe;
-        border-radius: 1rem;
-        padding: 1rem;
-    }
+	.selections {
+		background-color: #efe;
+		border-radius: 1rem;
+		padding: 1rem;
+	}
 </style>
