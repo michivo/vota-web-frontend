@@ -3,6 +3,8 @@
 	import { firebaseAuth } from '../services/firebase';
 	import { Button, Form, FormGroup, Input, Label } from 'sveltestrap';
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+	import { userStore } from '../stores/userStore';
 
 	let email = '';
 	let password = '';
@@ -13,6 +15,14 @@
     let hasError = false;
 
 	$: detailsMissing = !email || !password;
+
+	if (browser) {
+		userStore.subscribe((state) => {
+			if (state.isLoggedIn && state.initialized) {
+				goto('/dashboard');
+			}
+		});
+	}
 
 	async function signIn() {
         hasError = false;

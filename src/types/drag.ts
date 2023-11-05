@@ -1,0 +1,9 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+declare type Item = import("svelte-dnd-action").Item;
+declare type DndEvent<ItemType = Item> = import("svelte-dnd-action").DndEvent<ItemType>;
+declare namespace svelte.JSX {
+    interface HTMLAttributes<T> {
+        onconsider?: (event: CustomEvent<DndEvent<Item>> & {target: EventTarget & T}) => void;
+        onfinalize?: (event: CustomEvent<DndEvent<Item>> & {target: EventTarget & T}) => void;
+    }
+}

@@ -72,13 +72,13 @@
 
 <div>
 	<h1>Kandidat*innenauswahl</h1>
-	<div class="selection-panel" use:dndzone={{items:board, flipDurationMs, type:'columns'}}>
+	<div class="selection-panel">
 		{#each board as column (column.id)}
-			<div class="candidates" animate:flip={{ duration: flipDurationMs }}>
+			<div class="candidates pb-5" animate:flip={{ duration: flipDurationMs }}>
 				<h2>{column.title}</h2>
 				<div
-					class="column-content h-100 mb-5"
-					use:dndzone={{ items: column.items, flipDurationMs }}
+					class="column-content h-100"
+					use:dndzone={{ items: column.items, flipDurationMs, dropTargetStyle: {} }}
 					on:consider={(e) => handleDndConsiderCards(column.id, e)}
 					on:finalize={(e) => handleDndFinalizeCards(column.id, e)}
 				>
