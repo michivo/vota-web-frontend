@@ -77,14 +77,17 @@
 			<div class="candidates" animate:flip={{ duration: flipDurationMs }}>
 				<h2>{column.title}</h2>
 				<div
-					class="column-content h-100"
+					class="column-content h-100 mb-5"
 					use:dndzone={{ items: column.items, flipDurationMs }}
 					on:consider={(e) => handleDndConsiderCards(column.id, e)}
 					on:finalize={(e) => handleDndFinalizeCards(column.id, e)}
 				>
-					{#each column.items as item (item.id)}
+					{#each column.items as item, index (item.id)}
 						<div class="candidate" animate:flip={{ duration: flipDurationMs }}>
-							{item.name}
+                            {#if column.id === 2}
+                            <span>{index + 1}.</span>
+                            {/if}
+                            {item.name}
 						</div>
 					{/each}
 				</div>
