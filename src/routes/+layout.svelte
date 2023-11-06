@@ -45,7 +45,7 @@
 	</div>
 </main>
 
-<style lang="scss">
+<style lang="scss" global>
     $primary: rgb(115, 163, 3);
     $secondary: rgb(225, 0, 120);
 	$font-family: 'Metropolis', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -61,4 +61,11 @@
         height: 2.5rem;
         width: 2.5rem;
     }
+
+	a.navbar-brand {
+		font-weight: 900;
+		color: var(--bs-header-color);
+		font-style: italic;
+		text-transform: uppercase;
+	}
 </style>
