@@ -1,7 +1,18 @@
-import type { User } from "firebase/auth";
+export interface User {
+    name: string,
+    role: UserRole,
+    id: number,
+    displayName: string,
+    email: string,
+}
 
 export interface UserState {
     isLoggedIn: boolean,
     user: User | null | undefined,
-    initialized: boolean,
+}
+
+export enum UserRole {
+    None = 0,
+    Admin = 1,
+    Standard = 2,
 }

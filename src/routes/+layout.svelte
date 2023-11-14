@@ -4,20 +4,21 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { Button } from 'sveltestrap';
-	import { firebaseAuth } from '../services/firebase';
 	import { userStore } from '../stores/userStore';
 	import type { UserState } from '../types/userState';
 	import Fa from 'svelte-fa';
 	import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+	import { UserService } from '../services/userService';
 
 	let userState: UserState | null = null;
+	const userService = new UserService();
 
 	$: homeLink = userState?.isLoggedIn ? '/dashboard' : '/';
 
 	if (browser) {
 		userStore.subscribe((state) => {
 			userState = state;
-			if (!state.isLoggedIn && state.initialized) {
+			if (!state.isLoggedIn) {
 				goto('/');
 			}
 		});
@@ -30,9 +31,9 @@
 		{#if userState?.isLoggedIn}
 			<div class="user-info">
 				<small>
-					Angemeldet als {userState?.user?.displayName ?? userState.user?.email}
+					Angemeldet als {userState?.user?.displayName ?? userState.user?.email ?? userState?.user?.name}
 				</small>
-				<Button color="link" on:click={() => firebaseAuth.signOut()} title="Abmelden"
+				<Button color="link" on:click={() => userService.signOut()} title="Abmelden"
 					><Fa icon={faRightFromBracket} /></Button
 				>
 			</div>

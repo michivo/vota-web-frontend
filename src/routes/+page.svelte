@@ -1,24 +1,24 @@
 <script lang="ts">
-	import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-	import { firebaseAuth } from '../services/firebase';
 	import { Button, Form, FormGroup, Input, Label } from 'sveltestrap';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { userStore } from '../stores/userStore';
+	import { UserService } from '../services/userService';
 
-	let email = '';
+	let username = '';
 	let password = '';
 	let passwordConfirmation = '';
     let fullName = '';
 	let createNewAccount = false;
     let status = '';
     let hasError = false;
+	const userService = new UserService();
 
-	$: detailsMissing = !email || !password;
+	$: detailsMissing = !username || !password;
 
 	if (browser) {
 		userStore.subscribe((state) => {
-			if (state.isLoggedIn && state.initialized) {
+			if (state.isLoggedIn) {
 				goto('/dashboard');
 			}
 		});
@@ -27,14 +27,8 @@
 	async function signIn() {
         hasError = false;
         try {
-		    const result = await signInWithEmailAndPassword(firebaseAuth, email, password);
-            if(result.user.emailVerified === false) {
-                status = 'Bitte bestätigen Sie Ihre E-Mail-Adresse.';
-                await signOut(firebaseAuth);
-            }
-            else {
-                goto('/dashboard');
-            }
+		    await userService.signIn(username, password);
+            goto('/dashboard');
         }
         catch(err: any) {
             hasError = true;
@@ -45,21 +39,21 @@
     async function createUser() {
         status = '';
         hasError = false;
-        try {
-            const result = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-            await sendEmailVerification(result.user);
-            updateProfile(result.user, { displayName: fullName });
-            await signOut(firebaseAuth);
-            onReset();
-            status = 'Bitte bestätigen Sie Ihre E-Mail-Adresse';
-        }
-        catch(err: any) {
-            console.error('Error signing you up.');
-            console.log(err);
-            status = getErrorMessage(err, 'beim Erstellen Ihres Accounts');
+        // try {
+        //     const result = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+        //     await sendEmailVerification(result.user);
+        //     updateProfile(result.user, { displayName: fullName });
+        //     await signOut(firebaseAuth);
+        //     onReset();
+        //     status = 'Bitte bestätigen Sie Ihre E-Mail-Adresse';
+        // }
+        // catch(err: any) {
+        //     console.error('Error signing you up.');
+        //     console.log(err);
+        //     status = getErrorMessage(err, 'beim Erstellen Ihres Accounts');
             
-            hasError = true;
-        }
+        //     hasError = true;
+        // }
     }
 
     function getErrorMessage(err: any, activity: string): string {
@@ -81,7 +75,7 @@
 
     function onReset() {
         status = '';
-        email = '';
+        username = '';
         password = '';
         fullName = '';
         hasError = false;
@@ -93,8 +87,8 @@
 	<div class="login-form">
 		<Form>
 			<FormGroup>
-				<Label for="username">E-Mail</Label>
-				<Input id="username" type="text" bind:value={email} />
+				<Label for="username">Benutzer*innenname</Label>
+				<Input id="username" type="text" bind:value={username} />
 			</FormGroup>
 			<FormGroup>
 				<Label for="password">Passwort</Label>
