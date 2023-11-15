@@ -7,6 +7,7 @@
 	import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 	import { userStore } from '../../stores/userStore';
+	import EditUserModal from '../../components/editUserModal.svelte';
 
 	let users: UserDto[] = [];
 	let loading = false;
@@ -14,7 +15,10 @@
 	let filter = '';
 	let currentUser = undefined as User | undefined | null;
 	let userToDelete = undefined as UserDto | undefined;
+    let userToEdit = undefined as UserDto | undefined;
+
 	const userApi = new UserApi();
+
 	const unsubscribeUser = userStore.subscribe(
 		(val) => (currentUser = val.isLoggedIn ? val.user : undefined)
 	);
@@ -50,7 +54,7 @@
     }
 
     function showEditModal(user: UserDto) {
-        console.error(user);
+        userToEdit = {...user};
     }
 
 	async function deleteUser() {
@@ -65,6 +69,10 @@
 			loading = false;
 		}
 		await refresh();
+	}
+
+	function saveUser(e: CustomEvent<UserDto>): void {
+		console.error(e.detail);
 	}
 </script>
 
@@ -136,6 +144,7 @@
 			<Button color="secondary" on:click={() => userToDelete = undefined}>Nein</Button>
 		</ModalFooter>
 	</Modal>
+    <EditUserModal user={userToEdit} on:cancel={() => userToEdit = undefined} on:save={saveUser} />
 </div>
 
 <style>
