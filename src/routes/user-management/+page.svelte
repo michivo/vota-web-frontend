@@ -4,11 +4,15 @@
 	import { UserApi } from '../../services/userApi';
 	import { Spinner } from 'sveltestrap';
 	import { UserRole } from '../../types/userState';
+	import { faTrash } from '@fortawesome/free-solid-svg-icons';
+	import Fa from 'svelte-fa';
+	import { userStore } from '../../stores/userStore';
 
 	let users: UserDto[] = [];
 	let loading = false;
 	let hasError = false;
 	let filter = '';
+    const userApi = new UserApi();
 
 	$: filteredUsers = users.filter((u) => {
 		const filterString = filter.trim().toLocaleLowerCase();
@@ -22,17 +26,30 @@
 		);
 	});
 
-	onMount(async () => {
+	onMount(refresh);
+
+    async function refresh() {
 		loading = true;
 		try {
-			const userApi = new UserApi();
 			users = await userApi.getAllUsers();
 		} catch {
 			hasError = true;
 		} finally {
 			loading = false;
 		}
-	});
+    }
+
+
+	async function deleteUser(user: UserDto) {
+        loading = true;
+		try {
+            await userApi.deleteUser(user);
+        }
+        finally {
+            loading = false;
+        }
+        await refresh();
+	}
 </script>
 
 <div>
@@ -52,7 +69,6 @@
 				aria-describedby="filter-label"
 			/>
 		</div>
-        { filter }
 
 		<table class="table table-striped">
 			<thead>
@@ -70,8 +86,10 @@
 						<td>{user.username}</td>
 						<td>{user.fullName ?? ''}</td>
 						<td>{user.email ?? ''}</td>
-						<td>{user.role === UserRole.Admin ? 'Administrator' : 'Standard'}</td>
-						<td> TODO </td>
+						<td>{user.role === UserRole.Admin ? 'Admin' : 'Standard'}</td>
+						<td> 
+                            <button type="button" class="btn btn-flat" title="Benutzer*in löschen" on:click={() => deleteUser(user)}><Fa icon={faTrash} /></button> 
+                        </td>
 					</tr>
 				{/each}
 			</tbody>

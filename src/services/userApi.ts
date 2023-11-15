@@ -30,4 +30,12 @@ export class UserApi {
         return responseData as UserDto[];
     }
 
+    public async deleteUser(user: UserDto): Promise<void> {
+        const baseUrl = getBaseUrl();
+        await fetch(`${baseUrl}/v1/users/${user.id}`, {
+            method: 'DELETE',
+            headers: getAuthHeader(),
+        });
+    }
+
 }
