@@ -1,3 +1,6 @@
+import { get } from "svelte/store";
+import { userStore } from "../stores/userStore";
+
 function parseJwt(token: string) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -8,4 +11,14 @@ function parseJwt(token: string) {
     return JSON.parse(jsonPayload);
 }
 
-export { parseJwt };
+function getAuthHeader(): Record<string, string> {
+    const user = get(userStore);
+    const headers = {} as Record<string, string>;
+    headers['Content-Type'] = 'application/json';
+    if(user.user) {
+        headers['Authorization'] = `Bearer ${user.user.token}`;
+    }
+    return headers;
+}
+
+export { parseJwt, getAuthHeader };

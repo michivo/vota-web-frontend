@@ -4,6 +4,7 @@ export interface User {
     id: number,
     displayName: string,
     email: string,
+    token: string,
 }
 
 export interface UserState {

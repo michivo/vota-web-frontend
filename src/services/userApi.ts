@@ -1,11 +1,13 @@
 import type { SignInRequest, SignInResponse } from "../types/api/signIn";
+import type { UserDto } from "../types/api/usertDto";
 import { getBaseUrl } from "./settingsProvider";
+import { getAuthHeader } from "./utils";
 
 export class UserApi {
 
     public async signIn(request: SignInRequest): Promise<SignInResponse> {
         const baseUrl = getBaseUrl();
-        const response = await fetch(`${baseUrl}/v1/user/signInRequests`, {
+        const response = await fetch(`${baseUrl}/v1/users/signInRequests`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -15,6 +17,17 @@ export class UserApi {
 
         const responseData = await response.json();
         return responseData as SignInResponse;
+    }
+
+    public async getAllUsers(): Promise<UserDto[]> {
+        const baseUrl = getBaseUrl();
+        const response = await fetch(`${baseUrl}/v1/users/`, {
+            method: 'GET',
+            headers: getAuthHeader(),
+        });
+
+        const responseData = await response.json();
+        return responseData as UserDto[];
     }
 
 }

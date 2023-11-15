@@ -1,6 +1,4 @@
 <script lang="ts">
-    export const prerender = true;
-
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { Button } from 'sveltestrap';
@@ -25,17 +23,34 @@
 	}
 </script>
 
-<nav class="navbar bg-light">
+<nav class="navbar bg-light navbar-expand-lg">
 	<div class="container-fluid">
-		<a class="navbar-brand" href={homeLink}><img src="/faviconxl.png" height="192" width="192" alt="" class="logo me-3">VOTA Web</a>
+		<a class="navbar-brand me-4" href={homeLink}
+			><img src="/faviconxl.png" height="192" width="192" alt="" class="logo me-3" />VOTA Web</a
+		>
 		{#if userState?.isLoggedIn}
-			<div class="user-info">
-				<small>
-					Angemeldet als {userState?.user?.displayName ?? userState.user?.email ?? userState?.user?.name}
-				</small>
-				<Button color="link" on:click={() => userService.signOut()} title="Abmelden"
-					><Fa icon={faRightFromBracket} /></Button
-				>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		  </button>	  
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto">
+					<li class="nav-item">
+						<a class="nav-link" href="/elections">Wahlen</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/user-management">Benutzer*innenverwaltung</a>
+					</li>
+				</ul>
+				<div class="user-info">
+					<small>
+						Angemeldet als {userState?.user?.displayName ??
+							userState.user?.email ??
+							userState?.user?.name}
+					</small>
+					<Button color="link" on:click={() => userService.signOut()} title="Abmelden"
+						><Fa icon={faRightFromBracket} /></Button
+					>
+				</div>
 			</div>
 		{/if}
 	</div>
@@ -47,21 +62,21 @@
 </main>
 
 <style lang="scss" global>
-    $primary: rgb(115, 163, 3);
-    $secondary: rgb(225, 0, 120);
+	$primary: rgb(115, 163, 3);
+	$secondary: rgb(225, 0, 120);
 	$font-family: 'Metropolis', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	$header-color: rgb(115, 163, 3);
 
-    @import "../node_modules/bootstrap/scss/bootstrap";
+	@import '../node_modules/bootstrap/scss/bootstrap';
 	.vota-main {
 		height: 100lvh;
 		width: 100vw;
 	}
 
-    .logo {
-        height: 2.5rem;
-        width: 2.5rem;
-    }
+	.logo {
+		height: 2.5rem;
+		width: 2.5rem;
+	}
 
 	a.navbar-brand {
 		font-weight: 900;

@@ -23,6 +23,7 @@ function getInitialState() {
                         email: parsedJwt.email,
                         id: parsedJwt.uid,
                         role: parsedJwt.role,
+                        token: storedToken,
                     },
                 };
             }

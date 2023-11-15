@@ -25,6 +25,7 @@ export class UserService {
                         email: tokenData.email,
                         id: tokenData.uid,
                         role: tokenData.role,
+                        token: response.token,
                     },
                 };
                 userStore.set(userState);
