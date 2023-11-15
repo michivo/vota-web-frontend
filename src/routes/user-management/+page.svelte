@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { UserDto } from '../../types/api/usertDto';
 	import { UserApi } from '../../services/userApi';
-	import { Spinner } from 'sveltestrap';
-	import { UserRole } from '../../types/userState';
+	import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Spinner } from 'sveltestrap';
+	import { UserRole, type User } from '../../types/userState';
 	import { faTrash } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 	import { userStore } from '../../stores/userStore';
@@ -12,7 +12,12 @@
 	let loading = false;
 	let hasError = false;
 	let filter = '';
-    const userApi = new UserApi();
+	let currentUser = undefined as User | undefined | null;
+	let userToDelete = undefined as UserDto | undefined;
+	const userApi = new UserApi();
+	const unsubscribeUser = userStore.subscribe(
+		(val) => (currentUser = val.isLoggedIn ? val.user : undefined)
+	);
 
 	$: filteredUsers = users.filter((u) => {
 		const filterString = filter.trim().toLocaleLowerCase();
@@ -28,7 +33,9 @@
 
 	onMount(refresh);
 
-    async function refresh() {
+	onDestroy(unsubscribeUser);
+
+	async function refresh() {
 		loading = true;
 		try {
 			users = await userApi.getAllUsers();
@@ -37,18 +44,24 @@
 		} finally {
 			loading = false;
 		}
+	}
+
+	function showDeleteModal(user: UserDto) {
+        userToDelete = user;
     }
 
-
-	async function deleteUser(user: UserDto) {
-        loading = true;
+	async function deleteUser() {
+		loading = true;
+		const user = userToDelete;
+		userToDelete = undefined;
 		try {
-            await userApi.deleteUser(user);
-        }
-        finally {
-            loading = false;
-        }
-        await refresh();
+			if (user) {
+				await userApi.deleteUser(user);
+			}
+		} finally {
+			loading = false;
+		}
+		await refresh();
 	}
 </script>
 
@@ -87,12 +100,35 @@
 						<td>{user.fullName ?? ''}</td>
 						<td>{user.email ?? ''}</td>
 						<td>{user.role === UserRole.Admin ? 'Admin' : 'Standard'}</td>
-						<td> 
-                            <button type="button" class="btn btn-flat" title="Benutzer*in löschen" on:click={() => deleteUser(user)}><Fa icon={faTrash} /></button> 
-                        </td>
+						<td>
+							{#if currentUser && currentUser.id !== user.id}
+								<button
+									type="button"
+									class="btn btn-sm btn-flat btn-danger"
+									title="Benutzer*in löschen"
+									on:click={() => showDeleteModal(user)}><Fa icon={faTrash} /></button
+								>
+							{/if}
+						</td>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
 	{/if}
+	<Modal isOpen={!!userToDelete} toggle={() => userToDelete = undefined}>
+		<ModalHeader toggle={() => userToDelete = undefined}>Benutzer löschen</ModalHeader>
+		<ModalBody>
+			Sind Sie sicher, dass Sie Benutzer <em>{userToDelete?.username}</em> löschen wollen?
+		</ModalBody>
+		<ModalFooter>
+			<Button color="primary" on:click={deleteUser}>Ja</Button>
+			<Button color="secondary" on:click={() => userToDelete = undefined}>Nein</Button>
+		</ModalFooter>
+	</Modal>
 </div>
+
+<style>
+	td {
+		vertical-align: middle;
+	}
+</style>
