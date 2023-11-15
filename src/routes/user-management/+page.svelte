@@ -4,7 +4,7 @@
 	import { UserApi } from '../../services/userApi';
 	import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Spinner } from 'sveltestrap';
 	import { UserRole, type User } from '../../types/userState';
-	import { faTrash } from '@fortawesome/free-solid-svg-icons';
+	import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 	import { userStore } from '../../stores/userStore';
 
@@ -19,17 +19,16 @@
 		(val) => (currentUser = val.isLoggedIn ? val.user : undefined)
 	);
 
-	$: filteredUsers = users.filter((u) => {
+	$: filteredUsers = !filter.trim().toLocaleLowerCase() ?
+        users.sort((a, b) => a.username.localeCompare(b.username)) :
+        users.filter((u) => {
 		const filterString = filter.trim().toLocaleLowerCase();
-		if (!filterString) {
-			return users;
-		}
 		return (
 			u.email?.toLocaleLowerCase().includes(filterString) ||
 			u.fullName?.toLocaleLowerCase().includes(filterString) ||
 			u.username?.toLocaleLowerCase().includes(filterString)
 		);
-	});
+	}).sort((a, b) => a.username.localeCompare(b.username));
 
 	onMount(refresh);
 
@@ -48,6 +47,10 @@
 
 	function showDeleteModal(user: UserDto) {
         userToDelete = user;
+    }
+
+    function showEditModal(user: UserDto) {
+        console.error(user);
     }
 
 	async function deleteUser() {
@@ -95,19 +98,27 @@
 			</thead>
 			<tbody>
 				{#each filteredUsers as user}
-					<tr>
+					<tr class:table-primary={currentUser && currentUser.id === user.id}>
 						<td>{user.username}</td>
 						<td>{user.fullName ?? ''}</td>
 						<td>{user.email ?? ''}</td>
 						<td>{user.role === UserRole.Admin ? 'Admin' : 'Standard'}</td>
 						<td>
 							{#if currentUser && currentUser.id !== user.id}
+                            <div class="d-flex action-buttons">
 								<button
 									type="button"
-									class="btn btn-sm btn-flat btn-danger"
+									class="btn btn-sm btn-flat btn-outline-danger"
 									title="Benutzer*in löschen"
 									on:click={() => showDeleteModal(user)}><Fa icon={faTrash} /></button
 								>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-flat btn-outline-primary"
+                                    title="Benutzer*in bearbeiten"
+                                    on:click={() => showEditModal(user)}><Fa icon={faEdit} /></button
+                                >
+                            </div>
 							{/if}
 						</td>
 					</tr>
@@ -131,4 +142,8 @@
 	td {
 		vertical-align: middle;
 	}
+
+    .action-buttons {
+        gap: 0.5rem;
+    }
 </style>
