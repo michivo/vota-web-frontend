@@ -7,6 +7,7 @@
 	import Fa from 'svelte-fa';
 	import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 	import { UserService } from '../services/userService';
+	import { page } from '$app/stores';
 
 	let userState: UserState | null = null;
 	const userService = new UserService();
@@ -35,10 +36,10 @@
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav me-auto">
 					<li class="nav-item">
-						<a class="nav-link" href="/elections">Wahlen</a>
+						<a class="nav-link" href="/elections" class:active={$page.url.pathname.includes('/elections')}>Wahlen</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="/user-management">Benutzer*innenverwaltung</a>
+						<a class="nav-link" href="/user-management" class:active={$page.url.pathname.includes('/user-management')}>Benutzer*innenverwaltung</a>
 					</li>
 				</ul>
 				<div class="user-info">
@@ -83,5 +84,9 @@
 		color: var(--bs-header-color);
 		font-style: italic;
 		text-transform: uppercase;
+	}
+
+	a.nav-link.active {
+		font-weight: bold;
 	}
 </style>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { UserDto } from '../types/api/usertDto';
-	import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'sveltestrap';
+	import { Button, Form, FormGroup, FormText, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from 'sveltestrap';
 
 	export let user: UserDto | undefined;
 	export let isNewUser = false;
@@ -9,11 +9,20 @@
     let changePassword = false;
     let password = '';
     let passwordConfirmation = '';
+	let saveClicked = false;
+
+	$: userNameMissing = !user?.username && (saveClicked || !isNewUser);
+	$: passwordsNotMatching = saveClicked && !!password && !!passwordConfirmation && password !== passwordConfirmation;
+	$: passwordTooShort = saveClicked && password.length < 8;
 
 	const dispatch = createEventDispatcher();
 
 	function onSave() {
-		dispatch('save', user);
+		saveClicked = true;
+		if(userNameMissing || passwordsNotMatching || passwordTooShort) {
+			return;
+		}
+		dispatch('save', { user, changePassword, isNewUser, password: changePassword || isNewUser ? password : ''});
 	}
 
 	function onCancel() {
@@ -22,48 +31,47 @@
 </script>
 
 <div>
-    {#if user}
 	<Modal isOpen={!!user} toggle={onCancel} size="lg">
 		<ModalHeader toggle={onCancel}>Benutzer*in {isNewUser ? 'anlegen' : 'bearbeiten'}</ModalHeader>
-		<form>
+		{#if user}
+		<Form>
 			<ModalBody>
-                <div class="mb-3">
-					<label for="username" class="form-label">Benutzer*innennname</label>
-					<input type="text" class="form-control" id="username" bind:value={user.username} placeholder="maria.musterfrau" required />
-				</div>
-                <div class="mb-3">
-					<label for="fullName" class="form-label">Name</label>
-					<input type="text" class="form-control" id="fullName" bind:value={user.fullName} placeholder="Maria Musterfrau"/>
-				</div>                
-				<div class="mb-3">
-					<label for="userEmail" class="form-label">Email-Adresse</label>
-					<input type="email" class="form-control" id="userEmail" aria-describedby="emailHelp" bind:value={user.email} placeholder="maria.musterfrau@gruene.at"/>
-					<div id="emailHelp" class="form-text">
+                <FormGroup>
+					<Label for="username">Benutzer*innennname *</Label>
+					<Input feedback="Geben Sie einen Benutzer*innennamen an" type="text" id="username" bind:value={user.username} placeholder="maria.musterfrau" required bind:invalid={userNameMissing} />
+				</FormGroup>
+                <FormGroup>
+					<Label for="fullName">Name</Label>
+					<Input type="text" id="fullName" bind:value={user.fullName} placeholder="Maria Musterfrau"/>
+				</FormGroup>                
+				<FormGroup>
+					<Label for="userEmail">Email-Adresse</Label>
+					<Input type="email" id="userEmail" aria-describedby="emailHelp" bind:value={user.email} placeholder="maria.musterfrau@gruene.at"/>
+					<FormText id="emailHelp">
 						Die Email-Adresse ist optional und wird nur für das Zurücksetzen des Passworts benötigt.
-					</div>
-				</div>
+					</FormText>
+				</FormGroup>
                 {#if !isNewUser}
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="changePasswordCheckbox" bind:checked={changePassword}>
-                    <label class="form-check-label" for="changePasswordCheckbox">Passwort ändern</label>
-                </div>
+                <FormGroup>
+                    <Input type="switch" bind:checked={changePassword} label="Passwort ändern" />
+                </FormGroup>
                 {/if}
                 {#if isNewUser || changePassword}
-				<div class="mb-3">
-					<label for="userPassword" class="form-label">Passwort</label>
-					<input type="password" class="form-control" id="userPassword" bind:value={password} />
-				</div>
-				<div class="mb-3">
-					<label for="userPasswordConfirm" class="form-label">Passwort bestätigen</label>
-					<input type="password" class="form-control" id="userPasswordConfirm" bind:value={passwordConfirmation} />
-				</div>
+				<FormGroup>
+					<Label for="userPassword" class="form-label">Passwort</Label>
+					<Input type="password" id="userPassword" bind:value={password} bind:invalid={passwordTooShort} feedback="Das Passwort muss mindestens 8 Zeichen lang sein" />
+				</FormGroup>
+				<FormGroup>
+					<Label for="userPasswordConfirm" class="form-label">Passwort bestätigen</Label>
+					<Input type="password" id="userPasswordConfirm" bind:value={passwordConfirmation} bind:invalid={passwordsNotMatching} feedback="Passwörter stimmen nicht überein" />
+				</FormGroup>
                 {/if}
 			</ModalBody>
 			<ModalFooter>
 				<Button type="submit" color="primary" on:click={onSave}>Speichern</Button>
 				<Button color="secondary" on:click={onCancel}>Abbrechen</Button>
 			</ModalFooter>
-		</form>
+		</Form>
+		{/if}
 	</Modal>
-    {/if}
 </div>

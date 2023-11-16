@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import type { UserDto } from '../../types/api/usertDto';
+	import type { UserDto, UserWithPasswordDto } from '../../types/api/usertDto';
 	import { UserApi } from '../../services/userApi';
 	import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Spinner } from 'sveltestrap';
 	import { UserRole, type User } from '../../types/userState';
@@ -16,6 +16,8 @@
 	let currentUser = undefined as User | undefined | null;
 	let userToDelete = undefined as UserDto | undefined;
     let userToEdit = undefined as UserDto | undefined;
+	let infoMessage = '';
+	let infoState = 'success' as 'success' | 'error';
 
 	const userApi = new UserApi();
 
@@ -71,8 +73,38 @@
 		await refresh();
 	}
 
-	function saveUser(e: CustomEvent<UserDto>): void {
-		console.error(e.detail);
+	async function saveUser(event: CustomEvent<{ user: UserDto, changePassword: boolean, isNewUser: boolean, password: string}>): Promise<void> {
+		userToEdit = undefined;
+		loading = true;
+		try {
+			const user = event.detail.user;
+			if(event.detail.isNewUser) {
+				const newUser = {...user, password: event.detail.password } as UserWithPasswordDto;
+				await userApi.createUser(newUser);
+			}
+			else {
+				await userApi.updateUser(user);
+				if(event.detail.changePassword) {
+					try {
+						await userApi.setPassword(user.id, event.detail.password);
+					}
+					catch {
+						infoMessage = 'Unerwarteter Fehler beim Setzen des Passworts';
+						infoState = 'error';
+					}
+				}
+			}
+		}
+		catch {
+			infoMessage = event.detail.isNewUser ? 'Unerwarteter Fehler beim Erstellen' : 'Unerwarteter Fehler beim Bearbeiten';
+			infoState = 'error';			
+		}
+		finally {
+			loading = false;
+		}
+		infoMessage = event.detail.isNewUser ? 'Benutzer*in erfolgreich erstellt' : 'Benutzerin erfolgreich bearbeitet';
+		infoState = 'success';
+		await refresh();
 	}
 </script>
 
