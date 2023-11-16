@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { Button } from 'sveltestrap';
 	import { userStore } from '../stores/userStore';
-	import type { UserState } from '../types/userState';
+	import { UserRole, type UserState } from '../types/userState';
 	import Fa from 'svelte-fa';
 	import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 	import { UserService } from '../services/userService';
@@ -36,11 +36,13 @@
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav me-auto">
 					<li class="nav-item">
-						<a class="nav-link" href="/elections" class:active={$page.url.pathname.includes('/elections')}>Wahlen</a>
+						<a class="nav-link" href="/dashboard" class:active={$page.url.pathname.includes('/dashboard')}>Wahlen</a>
 					</li>
+					{#if userState?.user?.role === UserRole.Admin}
 					<li class="nav-item">
-						<a class="nav-link" href="/user-management" class:active={$page.url.pathname.includes('/user-management')}>Benutzer*innenverwaltung</a>
+						<a class="nav-link" href="/users" class:active={$page.url.pathname.includes('/user')}>Benutzer*innenverwaltung</a>
 					</li>
+					{/if}
 				</ul>
 				<div class="user-info">
 					<small>

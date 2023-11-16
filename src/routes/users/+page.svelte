@@ -17,7 +17,6 @@
 	import Fa from 'svelte-fa';
 	import { userStore } from '../../stores/userStore';
 	import EditUserModal from '../../components/editUserModal.svelte';
-	import { error } from '@sveltejs/kit';
 
 	let users: UserDto[] = [];
 	let loading = false;
@@ -179,7 +178,7 @@
 			</div>
 		</div>
 
-		<table class="table table-striped">
+		<table class="table">
 			<thead>
 				<tr>
 					<th scope="col">Benutzer*innenname</th>
