@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { UserDto } from '../types/api/usertDto';
 	import { Button, Form, FormGroup, FormText, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from 'sveltestrap';
+	import { UserRole } from '../types/userState';
 
 	export let user: UserDto | undefined;
 	export let isNewUser = false;
@@ -12,8 +13,8 @@
 	let saveClicked = false;
 
 	$: userNameMissing = !user?.username && (saveClicked || !isNewUser);
-	$: passwordsNotMatching = saveClicked && !!password && !!passwordConfirmation && password !== passwordConfirmation;
-	$: passwordTooShort = saveClicked && password.length < 8;
+	$: passwordsNotMatching = saveClicked && (isNewUser || changePassword) && !!password && !!passwordConfirmation && password !== passwordConfirmation;
+	$: passwordTooShort = saveClicked && (isNewUser || changePassword) && password.length < 8;
 
 	const dispatch = createEventDispatcher();
 
@@ -31,7 +32,7 @@
 </script>
 
 <div>
-	<Modal isOpen={!!user} toggle={onCancel} size="lg">
+	<Modal isOpen={!!user} toggle={onCancel} size="lg" on:open={() => saveClicked = false}>
 		<ModalHeader toggle={onCancel}>Benutzer*in {isNewUser ? 'anlegen' : 'bearbeiten'}</ModalHeader>
 		{#if user}
 		<Form>
@@ -51,6 +52,13 @@
 						Die Email-Adresse ist optional und wird nur für das Zurücksetzen des Passworts benötigt.
 					</FormText>
 				</FormGroup>
+				<FormGroup>
+					<Label for="roleSelect">Rolle</Label>
+					<select class="form-select" id="roleSelect" bind:value={user.role}>
+					  <option value={UserRole.Standard}>Standard</option>
+					  <option value={UserRole.Admin}>Admin</option>
+					</select>
+				  </FormGroup>
                 {#if !isNewUser}
                 <FormGroup>
                     <Input type="switch" bind:checked={changePassword} label="Passwort ändern" />

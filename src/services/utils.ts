@@ -21,4 +21,11 @@ function getAuthHeader(): Record<string, string> {
     return headers;
 }
 
-export { parseJwt, getAuthHeader };
+function handleResponse(response: Response) : Response {
+    if(!response.ok) {
+        throw new Error('Request failed');
+    }
+    return response;
+}
+
+export { parseJwt, getAuthHeader, handleResponse };
