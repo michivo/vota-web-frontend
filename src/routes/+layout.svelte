@@ -34,7 +34,7 @@
 			<span class="navbar-toggler-icon"></span>
 		  </button>	  
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<ul class="navbar-nav me-auto">
+				<ul class="navbar-nav ms-4 me-auto">
 					<li class="nav-item">
 						<a class="nav-link" href="/dashboard" class:active={$page.url.pathname.includes('/dashboard')}>Wahlen</a>
 					</li>
@@ -69,11 +69,25 @@
 	$secondary: rgb(225, 0, 120);
 	$font-family: 'Metropolis', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	$header-color: rgb(115, 163, 3);
+	$btn-border-radius: 1.25rem;
+	$btn-border-radius-lg: 2rem;
+	$btn-font-weight: 900;
+	$btn-color: #fff;
+	$navbar-active-color: rgb(115, 163, 3);
 
 	@import '../node_modules/bootstrap/scss/bootstrap';
 	.vota-main {
 		height: 100lvh;
 		width: 100vw;
+	}
+
+	.btn {
+		text-transform: uppercase;
+		font-style: italic;
+	}
+
+	.btn-primary {
+		color: #fff;
 	}
 
 	.logo {
@@ -88,7 +102,21 @@
 		text-transform: uppercase;
 	}
 
+	a.nav-link { 
+		text-transform: uppercase;
+		padding-bottom: 0.7rem;
+		font-weight: 900;
+		font-style: italic;
+		font-size: 1.25rem;
+		color: var(--bs-primary);
+	}
+
 	a.nav-link.active {
-		font-weight: bold;
+		border-top: 1px solid var(--bs-primary);
+		color: var(--bs-primary);
+	}
+
+	a.nav-link:hover {
+		color: var(--bs-secondary);
 	}
 </style>

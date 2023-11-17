@@ -174,7 +174,7 @@
 				/>
 			</div>
 			<div class="col">
-				<Button class="float-end" on:click={createNewUser}>Neue*n Benutzer*in anlegen</Button>
+				<Button class="float-end" on:click={createNewUser}>Neue*n Benutzer*in</Button>
 			</div>
 		</div>
 
@@ -255,6 +255,12 @@
 </div>
 
 <style>
+	th {
+		font-weight: 900;
+		text-transform: uppercase;
+		font-style: italic;
+	}
+
 	td {
 		vertical-align: middle;
 	}

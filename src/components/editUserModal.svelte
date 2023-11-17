@@ -38,7 +38,7 @@
 		<Form>
 			<ModalBody>
                 <FormGroup>
-					<Label for="username">Benutzer*innennname *</Label>
+					<Label for="username">Benutzer*innennname</Label>
 					<Input feedback="Geben Sie einen Benutzer*innennamen an" type="text" id="username" bind:value={user.username} placeholder="maria.musterfrau" required bind:invalid={userNameMissing} />
 				</FormGroup>
                 <FormGroup>

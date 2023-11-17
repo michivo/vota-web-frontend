@@ -78,7 +78,7 @@
 <template>
 	<div class="d-flex">
 		<h1 class="mt-5 flex-fill"><Fa icon={faRankingStar} class="me-3" />Wahlen</h1>
-		<Button class="align-self-center" size="lg" on:click={createNewElection}>Neue Wahl anlegen</Button>
+		<Button class="align-self-center" size="lg" on:click={createNewElection}>Neue Wahl</Button>
 	</div>
 	{#each elections as election}
 		<hr class="mt-5 mb-3" />
@@ -86,10 +86,10 @@
 			<h2 class="flex-fill mb-0">{election.title}</h2>
 			<div class="d-flex justify-content-end align-self-start">
 				<Button color="primary" on:click={() => editElection(election)} class="mx-2"
-					><Fa icon={faCheckToSlot} class="me-2" />Wahleinstellungen bearbeiten</Button
+					><Fa icon={faCheckToSlot} class="me-2" />Einstellungen</Button
 				>
 				<Button color="info" on:click={createNewElection}
-					><Fa icon={faSquarePollVertical} class="me-2" />Kandidat*innenliste bearbeiten</Button
+					><Fa icon={faSquarePollVertical} class="me-2" />Kandidat*innen</Button
 				>
 			</div>
 		</div>
