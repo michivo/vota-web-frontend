@@ -6,7 +6,6 @@
   import {
     faAngleDown,
     faAngleUp,
-    faArrowUp,
     faCircleMinus,
     faCirclePlus
   } from '@fortawesome/free-solid-svg-icons';
@@ -14,13 +13,29 @@
 
   export let election = undefined as ElectionDto | undefined;
   export let showModal = false;
+  let errorMessage = '';
   let loading = false;
   let candidates = [] as CandidateDto[];
+  let saveClicked = false;
   const electionApi = new ElectionApi();
+  $: errorToShow = saveClicked ? errorMessage : '';
 
   const dispatch = createEventDispatcher();
 
   function onSave() {
+    saveClicked = true;
+    const noNameCandidates = candidates.filter((c) => !c.name.trim());
+    if (noNameCandidates.length) {
+      errorMessage = 'Jede*r Kandidat*in muss einen Namen haben.';
+      return;
+    }
+    const duplicates = candidates.filter(
+      (c, i) => candidates.findIndex((c2) => c2.name === c.name) !== i
+    );
+    if (duplicates.length) {
+      errorMessage = 'Die Namen der Kandidat*innen müssen eindeutig sein.';
+      return;
+    }
     dispatch('save', candidates);
   }
 
@@ -29,6 +44,7 @@
   }
 
   async function loadCandidates(): Promise<void> {
+    saveClicked = false;
     if (election) {
       loading = true;
       try {
@@ -136,6 +152,9 @@
           </tr>
         </tbody>
       </Table>
+      {#if errorToShow}
+        <span class="alert alert-danger" role="alert">{errorMessage}</span>
+      {/if}
     </ModalBody>
     <ModalFooter>
       <Button type="submit" color="primary" on:click={onSave}>Speichern</Button>

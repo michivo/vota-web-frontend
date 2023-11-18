@@ -19,7 +19,13 @@
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import { onDestroy, onMount } from 'svelte';
-  import { ElectionState, type ElectionDto, ElectionType } from '../../types/api/electionDto';
+  import {
+    ElectionState,
+    type ElectionDto,
+    ElectionType,
+    type CandidateDto,
+    type ElectionWithCandidatesDto
+  } from '../../types/api/electionDto';
   import { ElectionApi } from '../../services/electionApi';
   import EditElectionModal from '../../components/editElectionModal.svelte';
   import type { User } from '../../types/userState';
@@ -137,6 +143,20 @@
 
     await refresh();
   }
+
+  async function saveCandidates(e: CustomEvent<CandidateDto[]>): Promise<void> {
+    const election = {
+      ...electionToEditCandidates,
+      candidates: e.detail
+    } as ElectionWithCandidatesDto;
+    try {
+      await electionApi.updateElection(election);
+    } finally {
+      electionToEditCandidates = undefined;
+	  showCandidatesModal = false;
+    }
+    await refresh();
+  }
 </script>
 
 <template>
@@ -163,16 +183,22 @@
             <Fa icon={faGear} class="me-2" />Einstellungen</Button>
           <Button size="sm" color="info" on:click={() => editCandidates(election)}>
             <Fa icon={faUsersGear} class="me-2" />Kandidat*innen</Button>
-          <Button size="sm" color="primary" on:click={() => confirmUpdateElectionState(election, ElectionState.Counting)}>
+          <Button
+            size="sm"
+            color="primary"
+            on:click={() => confirmUpdateElectionState(election, ElectionState.Counting)}>
             <Fa icon={faCheckCircle} class="me-2" />Freigeben</Button>
           <Button size="sm" color="danger" on:click={() => (electionToDelete = election)}>
             <Fa icon={faRemove} class="me-2" />Löschen</Button>
         {:else if election.electionState === ElectionState.Counting}
-		  <Button size="sm" color="info" on:click={() => alert('todo')}>
+          <Button size="sm" color="info" on:click={() => alert('todo')}>
             <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</Button>
-          <Button size="sm" color="primary" on:click={() => confirmUpdateElectionState(election, ElectionState.CountingComplete)}>
+          <Button
+            size="sm"
+            color="primary"
+            on:click={() => confirmUpdateElectionState(election, ElectionState.CountingComplete)}>
             <Fa icon={faCheckCircle} class="me-2" />Auswerten</Button>
-		{/if}
+        {/if}
       </div>
     </div>
   {/each}
@@ -184,6 +210,7 @@
   <EditCandidatesModal
     election={electionToEditCandidates}
     showModal={showCandidatesModal}
+    on:save={saveCandidates}
     on:cancel={() => (showCandidatesModal = false)} />
 
   <Modal isOpen={!!electionToDelete} toggle={() => (electionToDelete = undefined)}>
@@ -200,13 +227,14 @@
   <Modal isOpen={!!electionToUpdateState} toggle={() => (electionToUpdateState = undefined)}>
     <ModalHeader toggle={() => (electionToUpdateState = undefined)}>Wahl freigeben</ModalHeader>
     <ModalBody>
-		{#if electionToUpdateState?.electionState === ElectionState.Counting}
-      		Sind Sie sicher, dass Sie Wahl {electionToUpdateState?.title} zur Auszählung freischalten wollen?
-      		Sie können die Wahl und die Kandidat*innenliste danach nicht mehr bearbeiten und die Wahl nicht
-      		mehr löschen!
-	  {:else if electionToUpdateState?.electionState === ElectionState.CountingComplete}
-	  	Sind Sie sicher, dass Sie die Auszählung abschließen möchten? Danach können keine Stimmen mehr ausgezählt werden!
-	  {/if}
+      {#if electionToUpdateState?.electionState === ElectionState.Counting}
+        Sind Sie sicher, dass Sie Wahl {electionToUpdateState?.title} zur Auszählung freischalten wollen?
+        Sie können die Wahl und die Kandidat*innenliste danach nicht mehr bearbeiten und die Wahl nicht
+        mehr löschen!
+      {:else if electionToUpdateState?.electionState === ElectionState.CountingComplete}
+        Sind Sie sicher, dass Sie die Auszählung abschließen möchten? Danach können keine Stimmen
+        mehr ausgezählt werden!
+      {/if}
     </ModalBody>
     <ModalFooter>
       <Button color="primary" on:click={updateElectionState}>Ja</Button>
