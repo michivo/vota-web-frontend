@@ -1,163 +1,162 @@
 <script lang="ts">
-	import { Button, Form, FormGroup, Input, Label } from 'sveltestrap';
-	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
-	import { userStore } from '../stores/userStore';
-	import { UserService } from '../services/userService';
+  import { Button, Form, FormGroup, Input, Label } from 'sveltestrap';
+  import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
+  import { userStore } from '../stores/userStore';
+  import { UserService } from '../services/userService';
 
-	let username = '';
-	let password = '';
-	let passwordConfirmation = '';
-    let fullName = '';
-	let createNewAccount = false;
-    let status = '';
-    let hasError = false;
-	const userService = new UserService();
+  let username = '';
+  let password = '';
+  let passwordConfirmation = '';
+  let fullName = '';
+  let createNewAccount = false;
+  let status = '';
+  let hasError = false;
+  const userService = new UserService();
 
-	$: detailsMissing = !username || !password;
+  $: detailsMissing = !username || !password;
 
-	if (browser) {
-		userStore.subscribe((state) => {
-			if (state.isLoggedIn) {
-				goto('/dashboard');
-			}
-		});
-	}
+  if (browser) {
+    userStore.subscribe((state) => {
+      if (state.isLoggedIn) {
+        goto('/dashboard');
+      }
+    });
+  }
 
-	async function signIn() {
-        hasError = false;
-        try {
-		    await userService.signIn(username, password);
-            goto('/dashboard');
-        }
-        catch(err: any) {
-            hasError = true;
-            status = getErrorMessage(err, 'bei der Anmeldung');
-        }
-	}
+  async function signIn() {
+    hasError = false;
+    try {
+      await userService.signIn(username, password);
+      goto('/dashboard');
+    } catch (err: any) {
+      hasError = true;
+      status = getErrorMessage(err, 'bei der Anmeldung');
+    }
+  }
 
-    async function createUser() {
-        status = '';
-        hasError = false;
-        // try {
-        //     const result = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-        //     await sendEmailVerification(result.user);
-        //     updateProfile(result.user, { displayName: fullName });
-        //     await signOut(firebaseAuth);
-        //     onReset();
-        //     status = 'Bitte bestätigen Sie Ihre E-Mail-Adresse';
-        // }
-        // catch(err: any) {
-        //     console.error('Error signing you up.');
-        //     console.log(err);
-        //     status = getErrorMessage(err, 'beim Erstellen Ihres Accounts');
-            
-        //     hasError = true;
-        // }
+  async function createUser() {
+    status = '';
+    hasError = false;
+    // try {
+    //     const result = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+    //     await sendEmailVerification(result.user);
+    //     updateProfile(result.user, { displayName: fullName });
+    //     await signOut(firebaseAuth);
+    //     onReset();
+    //     status = 'Bitte bestätigen Sie Ihre E-Mail-Adresse';
+    // }
+    // catch(err: any) {
+    //     console.error('Error signing you up.');
+    //     console.log(err);
+    //     status = getErrorMessage(err, 'beim Erstellen Ihres Accounts');
+
+    //     hasError = true;
+    // }
+  }
+
+  function getErrorMessage(err: any, activity: string): string {
+    if (!err?.code) {
+      return 'Unerwarteter Fehler ' + activity;
     }
 
-    function getErrorMessage(err: any, activity: string): string {
-        if(!err?.code) {
-            return 'Unerwarteter Fehler ' + activity;
-        }
-
-        switch (err.code) {
-            case 'auth/email-already-in-use':
-                return 'Mit dieser Adresse ist bereits ein Account verknüpft.';
-            case 'auth/weak-password':
-                return 'Bitte wählen Sie ein stärkeres Passwort (min. 6 Zeichen)';
-            case 'auth/invalid-login-credentials':
-                return 'Bitte prüfen Sie Ihren E-Mail-Adresse und Ihr Passwort'
-            default:
-                return 'Fehler ' + activity + ': ' + err.code;
-        }
+    switch (err.code) {
+      case 'auth/email-already-in-use':
+        return 'Mit dieser Adresse ist bereits ein Account verknüpft.';
+      case 'auth/weak-password':
+        return 'Bitte wählen Sie ein stärkeres Passwort (min. 6 Zeichen)';
+      case 'auth/invalid-login-credentials':
+        return 'Bitte prüfen Sie Ihren E-Mail-Adresse und Ihr Passwort';
+      default:
+        return 'Fehler ' + activity + ': ' + err.code;
     }
+  }
 
-    function onReset() {
-        status = '';
-        username = '';
-        password = '';
-        fullName = '';
-        hasError = false;
-        createNewAccount = false;
-    }
+  function onReset() {
+    status = '';
+    username = '';
+    password = '';
+    fullName = '';
+    hasError = false;
+    createNewAccount = false;
+  }
 </script>
 
 <div class="container main-content">
-	<div class="login-form">
-		<Form>
-			<FormGroup>
-				<Label for="username">Benutzer*innenname</Label>
-				<Input id="username" type="text" bind:value={username} />
-			</FormGroup>
-			<FormGroup>
-				<Label for="password">Passwort</Label>
-				<Input id="password" type="password" bind:value={password} />
-			</FormGroup>
-			{#if createNewAccount}
-				<FormGroup>
-					<Label for="passwordConfirm">Passwort wiederholen</Label>
-					<Input id="passwordConfirm" type="password" bind:value={passwordConfirmation} />
-				</FormGroup>
-                <FormGroup>
-                    <Label for="fullname">Vor- und Nachname</Label>
-                    <Input id="fullname" type="text" bind:value={fullName} />
-                </FormGroup>                
-			{/if}
-			{#if !!status}
-				<div
-					class="status text-small mb-3"
-					class:text-danger={hasError}
-					class:text-success={!hasError}
-				>
-					<small>{status} </small>
-				</div>
-			{/if}
-			<div class="buttons">
-				{#if !createNewAccount}
-					<Button
-						class="flex-grow-1"
-						color="primary"
-						bind:disabled={detailsMissing}
-						on:click={signIn}>Anmelden</Button
-					>
-					<Button class="flex-grow-1" color="light" on:click={() => (createNewAccount = true)}
-						>Registrieren</Button
-					>
-				{:else}
-					<Button
-						class="flex-grow-1"
-						color="primary"
-						bind:disabled={detailsMissing}
-						on:click={createUser}>OK</Button
-					>
-					<Button class="flex-grow-1" color="light" on:click={onReset}>Abbrechen</Button>
-				{/if}
-			</div>
-		</Form>
-	</div>
+  <div class="login-form">
+    <Form>
+      <FormGroup>
+        <Label for="username">Benutzer*innenname</Label>
+        <Input id="username" type="text" bind:value={username} />
+      </FormGroup>
+      <FormGroup>
+        <Label for="password">Passwort</Label>
+        <Input id="password" type="password" bind:value={password} />
+      </FormGroup>
+      {#if createNewAccount}
+        <FormGroup>
+          <Label for="passwordConfirm">Passwort wiederholen</Label>
+          <Input id="passwordConfirm" type="password" bind:value={passwordConfirmation} />
+        </FormGroup>
+        <FormGroup>
+          <Label for="fullname">Vor- und Nachname</Label>
+          <Input id="fullname" type="text" bind:value={fullName} />
+        </FormGroup>
+      {/if}
+      {#if !!status}
+        <div
+          class="status text-small mb-3"
+          class:text-danger={hasError}
+          class:text-success={!hasError}
+        >
+          <small>{status} </small>
+        </div>
+      {/if}
+      <div class="buttons">
+        {#if !createNewAccount}
+          <Button
+            class="flex-grow-1"
+            color="primary"
+            bind:disabled={detailsMissing}
+            on:click={signIn}>Anmelden</Button
+          >
+          <Button class="flex-grow-1" color="light" on:click={() => (createNewAccount = true)}
+            >Registrieren</Button
+          >
+        {:else}
+          <Button
+            class="flex-grow-1"
+            color="primary"
+            bind:disabled={detailsMissing}
+            on:click={createUser}>OK</Button
+          >
+          <Button class="flex-grow-1" color="light" on:click={onReset}>Abbrechen</Button>
+        {/if}
+      </div>
+    </Form>
+  </div>
 </div>
 
 <style>
-	.main-content {
-		display: flex;
-		height: 100%;
-		width: 100svh;
-		justify-content: center;
-		align-items: center;
-	}
+  .main-content {
+    display: flex;
+    height: 100%;
+    width: 100svh;
+    justify-content: center;
+    align-items: center;
+  }
 
-	.login-form {
-		border: 1px solid #eee;
-		border-radius: 0.25rem;
-		padding: 2rem;
-		width: 25%;
-		min-width: 25rem;
-	}
+  .login-form {
+    border: 1px solid #eee;
+    border-radius: 0.25rem;
+    padding: 2rem;
+    width: 25%;
+    min-width: 25rem;
+  }
 
-	.buttons {
-		width: 100%;
-		display: flex;
-		gap: 1rem;
-	}
+  .buttons {
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+  }
 </style>

@@ -1,4 +1,4 @@
-import type { ElectionDto } from "../types/api/electionDto";
+import type { ElectionDto, ElectionWithCandidatesDto } from "../types/api/electionDto";
 import { getBaseUrl } from "./settingsProvider";
 import { getAuthHeader } from "./utils";
 
@@ -24,5 +24,17 @@ export class ElectionApi {
             headers: getAuthHeader(),
             body: JSON.stringify(election),
         });
+    }
+
+    public async getElectionWithCandidates(electionId: number): Promise<ElectionWithCandidatesDto> {
+        const baseUrl = getBaseUrl();
+        const response = await fetch(`${baseUrl}/v1/elections/${electionId}`, {
+            method: 'GET',
+            headers: getAuthHeader(),
+        });
+
+        const responseData = await response.json();
+        responseData.dateCreated = new Date(responseData.dateCreated);
+        return responseData as ElectionWithCandidatesDto;
     }
 }
