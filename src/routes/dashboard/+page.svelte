@@ -1,11 +1,20 @@
 <script lang="ts">
-  import { Button, ListGroup, ListGroupItem } from 'sveltestrap';
+  import {
+    Button,
+    ListGroup,
+    ListGroupItem,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader
+  } from 'sveltestrap';
   import { userStore } from '../../stores/userStore';
   import {
-    faCheckToSlot,
+    faCheckCircle,
     faGear,
+    faListOl,
     faRankingStar,
-    faSquarePollVertical,
+    faRemove,
     faUsersGear
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
@@ -23,6 +32,8 @@
   let isNewElection = false;
   let showCandidatesModal = false;
   let electionToEditCandidates = undefined as ElectionDto | undefined;
+  let electionToDelete = undefined as ElectionDto | undefined;
+  let electionToUpdateState = undefined as ElectionDto | undefined;
   const electionApi = new ElectionApi();
 
   const unsubscribeUser = userStore.subscribe(
@@ -83,6 +94,49 @@
     electionToEditCandidates = election;
     showCandidatesModal = true;
   }
+
+  function formatElectionState(state: ElectionState) {
+    switch (state) {
+      case ElectionState.Creating:
+        return 'erstellt';
+      case ElectionState.Counting:
+        return 'Auszählung läuft';
+      case ElectionState.CountingComplete:
+        return 'Auszählung abgeschlossen';
+      case ElectionState.Done:
+        return 'Abgeschlossen';
+      default:
+        return '';
+    }
+  }
+
+  async function deleteElection(): Promise<void> {
+    if (electionToDelete) {
+      try {
+        await electionApi.deleteElection(electionToDelete?.id);
+      } finally {
+        electionToDelete = undefined;
+      }
+    }
+    await refresh();
+  }
+
+  function confirmUpdateElectionState(election: ElectionDto, electionState: ElectionState) {
+    electionToUpdateState = { ...election };
+    electionToUpdateState.electionState = electionState;
+  }
+
+  async function updateElectionState() {
+    try {
+      if (electionToUpdateState) {
+        await electionApi.updateElection(electionToUpdateState);
+      }
+    } finally {
+      electionToUpdateState = undefined;
+    }
+
+    await refresh();
+  }
 </script>
 
 <template>
@@ -93,30 +147,77 @@
   {#each elections as election}
     <hr class="mt-5 mb-3" />
     <div class="d-flex mt-3">
-      <h2 class="flex-fill mb-0">{election.title}</h2>
-      <div class="d-flex justify-content-end align-self-start">
-        <Button color="primary" on:click={() => editElection(election)} class="mx-2"
-          ><Fa icon={faGear} class="me-2" />Einstellungen</Button
-        >
-        <Button color="info" on:click={() => editCandidates(election)}
-          ><Fa icon={faUsersGear} class="me-2" />Kandidat*innen</Button
-        >
+      <div class="flex-fill">
+        <h2 class="mb-0">
+          {election.title}<span class="election-state"
+            >- {formatElectionState(election.electionState)}</span>
+        </h2>
+        <small>Erstellt am {election.dateCreated.toLocaleDateString()}</small>
+        {#if election.description}
+          <p class="mt-3">{election.description}</p>
+        {/if}
+      </div>
+      <div class="d-flex justify-content-end align-self-start flex-column gap-2">
+        {#if election.electionState === ElectionState.Creating}
+          <Button size="sm" color="primary" on:click={() => editElection(election)}>
+            <Fa icon={faGear} class="me-2" />Einstellungen</Button>
+          <Button size="sm" color="info" on:click={() => editCandidates(election)}>
+            <Fa icon={faUsersGear} class="me-2" />Kandidat*innen</Button>
+          <Button size="sm" color="primary" on:click={() => confirmUpdateElectionState(election, ElectionState.Counting)}>
+            <Fa icon={faCheckCircle} class="me-2" />Freigeben</Button>
+          <Button size="sm" color="danger" on:click={() => (electionToDelete = election)}>
+            <Fa icon={faRemove} class="me-2" />Löschen</Button>
+        {:else if election.electionState === ElectionState.Counting}
+		  <Button size="sm" color="info" on:click={() => alert('todo')}>
+            <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</Button>
+          <Button size="sm" color="primary" on:click={() => confirmUpdateElectionState(election, ElectionState.CountingComplete)}>
+            <Fa icon={faCheckCircle} class="me-2" />Auswerten</Button>
+		{/if}
       </div>
     </div>
-    <small>Erstellt am {election.dateCreated.toLocaleDateString()}</small>
-    {#if election.description}
-      <p class="mt-3">{election.description}</p>
-    {/if}
   {/each}
   <EditElectionModal
     election={electionToEdit}
     {isNewElection}
     on:cancel={() => (electionToEdit = undefined)}
-    on:save={saveElection}
-  />
+    on:save={saveElection} />
   <EditCandidatesModal
     election={electionToEditCandidates}
     showModal={showCandidatesModal}
-    on:cancel={() => (showCandidatesModal = false)}
-  />
+    on:cancel={() => (showCandidatesModal = false)} />
+
+  <Modal isOpen={!!electionToDelete} toggle={() => (electionToDelete = undefined)}>
+    <ModalHeader toggle={() => (electionToDelete = undefined)}>Wahl löschen</ModalHeader>
+    <ModalBody>
+      Sind Sie sicher, dass Sie Wahl <em>{electionToDelete?.title}</em> unwiderruflich löschen wollen?
+    </ModalBody>
+    <ModalFooter>
+      <Button color="primary" on:click={deleteElection}>Ja</Button>
+      <Button color="secondary" on:click={() => (electionToDelete = undefined)}>Nein</Button>
+    </ModalFooter>
+  </Modal>
+
+  <Modal isOpen={!!electionToUpdateState} toggle={() => (electionToUpdateState = undefined)}>
+    <ModalHeader toggle={() => (electionToUpdateState = undefined)}>Wahl freigeben</ModalHeader>
+    <ModalBody>
+		{#if electionToUpdateState?.electionState === ElectionState.Counting}
+      		Sind Sie sicher, dass Sie Wahl {electionToUpdateState?.title} zur Auszählung freischalten wollen?
+      		Sie können die Wahl und die Kandidat*innenliste danach nicht mehr bearbeiten und die Wahl nicht
+      		mehr löschen!
+	  {:else if electionToUpdateState?.electionState === ElectionState.CountingComplete}
+	  	Sind Sie sicher, dass Sie die Auszählung abschließen möchten? Danach können keine Stimmen mehr ausgezählt werden!
+	  {/if}
+    </ModalBody>
+    <ModalFooter>
+      <Button color="primary" on:click={updateElectionState}>Ja</Button>
+      <Button color="secondary" on:click={() => (electionToUpdateState = undefined)}>Nein</Button>
+    </ModalFooter>
+  </Modal>
 </template>
+
+<style>
+  .election-state {
+    margin-left: 1rem;
+    font-size: 0.6em;
+  }
+</style>

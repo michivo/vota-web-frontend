@@ -37,4 +37,21 @@ export class ElectionApi {
         responseData.dateCreated = new Date(responseData.dateCreated);
         return responseData as ElectionWithCandidatesDto;
     }
+
+    public async deleteElection(id: number) {
+        const baseUrl = getBaseUrl();
+        await fetch(`${baseUrl}/v1/elections/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeader(),
+        });
+    }
+
+    public async updateElection(election: ElectionDto) {
+        const baseUrl = getBaseUrl();
+        await fetch(`${baseUrl}/v1/elections/${election.id}`, {
+            method: 'PUT',
+            headers: getAuthHeader(),
+            body: JSON.stringify(election),
+        });
+    }    
 }

@@ -85,6 +85,7 @@
   $header-color: rgb(115, 163, 3);
   $btn-border-radius: 1.25rem;
   $btn-border-radius-lg: 2rem;
+  $btn-border-radius-sm: 1rem;
   $btn-font-weight: 900;
   $btn-color: #fff;
   $navbar-active-color: rgb(115, 163, 3);
