@@ -7,9 +7,6 @@
 
   let username = '';
   let password = '';
-  let passwordConfirmation = '';
-  let fullName = '';
-  let createNewAccount = false;
   let status = '';
   let hasError = false;
   const userService = new UserService();
@@ -35,26 +32,6 @@
     }
   }
 
-  async function createUser() {
-    status = '';
-    hasError = false;
-    // try {
-    //     const result = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-    //     await sendEmailVerification(result.user);
-    //     updateProfile(result.user, { displayName: fullName });
-    //     await signOut(firebaseAuth);
-    //     onReset();
-    //     status = 'Bitte bestätigen Sie Ihre E-Mail-Adresse';
-    // }
-    // catch(err: any) {
-    //     console.error('Error signing you up.');
-    //     console.log(err);
-    //     status = getErrorMessage(err, 'beim Erstellen Ihres Accounts');
-
-    //     hasError = true;
-    // }
-  }
-
   function getErrorMessage(err: any, activity: string): string {
     if (!err?.code) {
       return 'Unerwarteter Fehler ' + activity;
@@ -71,15 +48,6 @@
         return 'Fehler ' + activity + ': ' + err.code;
     }
   }
-
-  function onReset() {
-    status = '';
-    username = '';
-    password = '';
-    fullName = '';
-    hasError = false;
-    createNewAccount = false;
-  }
 </script>
 
 <div class="container main-content">
@@ -93,45 +61,17 @@
         <Label for="password">Passwort</Label>
         <Input id="password" type="password" bind:value={password} />
       </FormGroup>
-      {#if createNewAccount}
-        <FormGroup>
-          <Label for="passwordConfirm">Passwort wiederholen</Label>
-          <Input id="passwordConfirm" type="password" bind:value={passwordConfirmation} />
-        </FormGroup>
-        <FormGroup>
-          <Label for="fullname">Vor- und Nachname</Label>
-          <Input id="fullname" type="text" bind:value={fullName} />
-        </FormGroup>
-      {/if}
       {#if !!status}
         <div
           class="status text-small mb-3"
           class:text-danger={hasError}
-          class:text-success={!hasError}
-        >
+          class:text-success={!hasError}>
           <small>{status} </small>
         </div>
       {/if}
       <div class="buttons">
-        {#if !createNewAccount}
-          <Button
-            class="flex-grow-1"
-            color="primary"
-            bind:disabled={detailsMissing}
-            on:click={signIn}>Anmelden</Button
-          >
-          <Button class="flex-grow-1" color="light" on:click={() => (createNewAccount = true)}
-            >Registrieren</Button
-          >
-        {:else}
-          <Button
-            class="flex-grow-1"
-            color="primary"
-            bind:disabled={detailsMissing}
-            on:click={createUser}>OK</Button
-          >
-          <Button class="flex-grow-1" color="light" on:click={onReset}>Abbrechen</Button>
-        {/if}
+        <Button class="flex-grow-1" color="primary" bind:disabled={detailsMissing} on:click={signIn}
+          >Anmelden</Button>
       </div>
     </Form>
   </div>
