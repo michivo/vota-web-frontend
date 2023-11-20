@@ -19,6 +19,7 @@
   export let isNewUser = false;
 
   let changePassword = false;
+  let setInitialPassword = true;
   let password = '';
   let passwordConfirmation = '';
   let saveClicked = false;
@@ -31,6 +32,7 @@
     !!passwordConfirmation &&
     password !== passwordConfirmation;
   $: passwordTooShort = saveClicked && (isNewUser || changePassword) && password.length < 8;
+  $: isEmailMissing = !(user?.email && /^\S+@\S+\.\S+$/.test(user.email));
 
   const dispatch = createEventDispatcher();
 
@@ -39,11 +41,13 @@
     if (userNameMissing || passwordsNotMatching || passwordTooShort) {
       return;
     }
+
     dispatch('save', {
       user,
       changePassword,
       isNewUser,
-      password: changePassword || isNewUser ? password : ''
+      password: changePassword || isNewUser ? password : '',
+      setInitialPassword
     });
   }
 
@@ -78,7 +82,7 @@
               placeholder="Maria Musterfrau" />
           </FormGroup>
           <FormGroup>
-            <Label for="userEmail">Email-Adresse</Label>
+            <Label for="userEmail">E-Mail-Adresse</Label>
             <Input
               type="email"
               id="userEmail"
@@ -86,7 +90,7 @@
               bind:value={user.email}
               placeholder="maria.musterfrau@gruene.at" />
             <FormText id="emailHelp">
-              Die Email-Adresse ist optional und wird nur für das Zurücksetzen des Passworts
+              Die E-Mail-Adresse ist optional und wird nur für das Zurücksetzen des Passworts
               benötigt.
             </FormText>
           </FormGroup>
@@ -102,7 +106,21 @@
               <Input type="switch" bind:checked={changePassword} label="Passwort ändern" />
             </FormGroup>
           {/if}
-          {#if isNewUser || changePassword}
+          {#if isNewUser}
+            <FormGroup>
+              <Input
+                type="switch"
+                bind:checked={setInitialPassword}
+                label="Passwort setzen"
+                aria-describedby="setEmailHelp"
+                bind:disabled={isEmailMissing} />
+              <FormText id="setEmailHelp">
+                Wenn Sie kein Passwort setzen, wird ein Link an die oben angegebene E-Mail-Adresse geschickt, über den
+                ein Passwort gesetzt werden kann.
+              </FormText>
+            </FormGroup>
+          {/if}
+          {#if (isNewUser && setInitialPassword) || changePassword}
             <FormGroup>
               <Label for="userPassword" class="form-label">Passwort</Label>
               <Input

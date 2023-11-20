@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
-  import type { UserDto, UserWithPasswordDto } from '../../types/api/usertDto';
+  import type { CreateUserRequest, UserDto, UserWithPasswordDto } from '../../types/api/usertDto';
   import { UserApi } from '../../services/userApi';
   import {
     Button,
@@ -92,6 +92,7 @@
       changePassword: boolean;
       isNewUser: boolean;
       password: string;
+      setInitialPassword: boolean,
     }>
   ): Promise<void> {
     userToEdit = undefined;
@@ -100,7 +101,7 @@
     try {
       const user = event.detail.user;
       if (event.detail.isNewUser) {
-        const newUser = { ...user, password: event.detail.password } as UserWithPasswordDto;
+        const newUser = { ...user, password: event.detail.password, sendPasswordLink: !event.detail.setInitialPassword } as CreateUserRequest;
         await userApi.createUser(newUser);
       } else {
         await userApi.updateUser(user);
@@ -174,7 +175,7 @@
         />
       </div>
       <div class="col">
-        <Button class="float-end" on:click={createNewUser}>Neue*n Benutzer*in</Button>
+        <Button class="float-end" on:click={createNewUser}>Neue*r Benutzer*in</Button>
       </div>
     </div>
 

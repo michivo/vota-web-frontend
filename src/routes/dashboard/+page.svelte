@@ -28,7 +28,7 @@
   } from '../../types/api/electionDto';
   import { ElectionApi } from '../../services/electionApi';
   import EditElectionModal from '../../components/editElectionModal.svelte';
-  import type { User } from '../../types/userState';
+  import { UserRole, type User } from '../../types/userState';
   import EditCandidatesModal from '../../components/editCandidatesModal.svelte';
 
   let loading = false;
@@ -69,7 +69,7 @@
       createUserId: 0,
       dateCreated: new Date(),
       electionState: ElectionState.Creating,
-      electionType: ElectionType.StandardSingleTransferableVote,
+      electionType: ElectionType.OrderedSingleTransferableVote,
       id: 0
     };
   }
@@ -153,7 +153,7 @@
       await electionApi.updateElection(election);
     } finally {
       electionToEditCandidates = undefined;
-	  showCandidatesModal = false;
+      showCandidatesModal = false;
     }
     await refresh();
   }
@@ -162,7 +162,9 @@
 <template>
   <div class="d-flex">
     <h1 class="mt-5 flex-fill"><Fa icon={faRankingStar} class="me-3" />Wahlen</h1>
-    <Button class="align-self-center" size="lg" on:click={createNewElection}>Neue Wahl</Button>
+    {#if currentUser?.role === UserRole.Admin}
+      <Button class="align-self-center" size="lg" on:click={createNewElection}>Neue Wahl</Button>
+    {/if}
   </div>
   {#each elections as election}
     <hr class="mt-5 mb-3" />
@@ -178,7 +180,7 @@
         {/if}
       </div>
       <div class="d-flex justify-content-end align-self-start flex-column gap-2">
-        {#if election.electionState === ElectionState.Creating}
+        {#if election.electionState === ElectionState.Creating && currentUser?.role === UserRole.Admin}
           <Button size="sm" color="primary" on:click={() => editElection(election)}>
             <Fa icon={faGear} class="me-2" />Einstellungen</Button>
           <Button size="sm" color="info" on:click={() => editCandidates(election)}>
@@ -193,11 +195,13 @@
         {:else if election.electionState === ElectionState.Counting}
           <Button size="sm" color="info" on:click={() => alert('todo')}>
             <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</Button>
-          <Button
-            size="sm"
-            color="primary"
-            on:click={() => confirmUpdateElectionState(election, ElectionState.CountingComplete)}>
-            <Fa icon={faCheckCircle} class="me-2" />Auswerten</Button>
+          {#if currentUser?.role === UserRole.Admin}
+            <Button
+              size="sm"
+              color="primary"
+              on:click={() => confirmUpdateElectionState(election, ElectionState.CountingComplete)}>
+              <Fa icon={faCheckCircle} class="me-2" />Auswerten</Button>
+          {/if}
         {/if}
       </div>
     </div>

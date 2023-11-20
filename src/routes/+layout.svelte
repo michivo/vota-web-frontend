@@ -10,14 +10,18 @@
   import { page } from '$app/stores';
 
   let userState: UserState | null = null;
+  let isAnonymousRoute = false;
   const userService = new UserService();
+  const anonymousRoutes = ['/reset-password'];
 
   $: homeLink = userState?.isLoggedIn ? '/dashboard' : '/';
 
   if (browser) {
+    isAnonymousRoute = !!anonymousRoutes.find(r => window.location.pathname.startsWith(r));
+
     userStore.subscribe((state) => {
       userState = state;
-      if (!state.isLoggedIn) {
+      if (!state.isLoggedIn && !isAnonymousRoute) {
         goto('/');
       }
     });
@@ -29,7 +33,7 @@
     <a class="navbar-brand me-4" href={homeLink}
       ><img src="/faviconxl.png" height="192" width="192" alt="" class="logo me-3" />VOTA Web</a
     >
-    {#if userState?.isLoggedIn}
+    {#if userState?.isLoggedIn && !isAnonymousRoute}
       <button
         class="navbar-toggler"
         type="button"

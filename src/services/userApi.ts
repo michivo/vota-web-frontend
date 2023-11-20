@@ -46,6 +46,15 @@ export class UserApi {
         }));
     }
 
+    public async setInitialPassword(challenge: string, password: string) {
+        const baseUrl = getBaseUrl();
+        handleResponse(await fetch(`${baseUrl}/v1/users/challengeResponses`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ challenge, password }),
+        }));
+    }    
+
     public async updateUser(user: UserDto): Promise<void> {
         const baseUrl = getBaseUrl();
         handleResponse(await fetch(`${baseUrl}/v1/users/${user.id}`, {

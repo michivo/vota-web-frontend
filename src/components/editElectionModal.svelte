@@ -11,7 +11,7 @@
     ModalFooter,
     ModalHeader
   } from 'sveltestrap';
-  import type { ElectionDto } from '../types/api/electionDto';
+  import { ElectionType, type ElectionDto } from '../types/api/electionDto';
 
   export let election: ElectionDto | undefined;
   export let isNewElection = false;
@@ -62,6 +62,13 @@
               label="Geschlechterparität berücksichtigen"
             />
           </FormGroup>
+          <FormGroup>
+            <Label for="roleSelect">Typ</Label>
+            <select class="form-select" id="roleSelect" bind:value={election.electionType}>
+              <option value={ElectionType.OrderedSingleTransferableVote}>Mit Reihung</option>
+              <option value={ElectionType.UnorderedSingleTransferableVote}>Ohne Reihung</option>
+            </select>
+          </FormGroup>          
         </ModalBody>
         <ModalFooter>
           <Button type="submit" color="primary" on:click={onSave}>Speichern</Button>
