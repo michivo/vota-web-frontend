@@ -70,7 +70,9 @@
       dateCreated: new Date(),
       electionState: ElectionState.Creating,
       electionType: ElectionType.OrderedSingleTransferableVote,
-      id: 0
+      id: 0,
+      alreadyElectedFemale: 0,
+      alreadyElectedMale: 0,
     };
   }
 

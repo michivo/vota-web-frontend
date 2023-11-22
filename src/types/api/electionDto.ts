@@ -21,6 +21,8 @@ export interface ElectionDto {
     enforceGenderParity: boolean,
     electionType: ElectionType,
     electionState: ElectionState,
+    alreadyElectedMale: number,
+    alreadyElectedFemale: number,
 };
 
 export interface ElectionWithCandidatesDto extends ElectionDto {
