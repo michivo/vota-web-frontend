@@ -92,7 +92,7 @@
       changePassword: boolean;
       isNewUser: boolean;
       password: string;
-      setInitialPassword: boolean,
+      setInitialPassword: boolean;
     }>
   ): Promise<void> {
     userToEdit = undefined;
@@ -101,7 +101,11 @@
     try {
       const user = event.detail.user;
       if (event.detail.isNewUser) {
-        const newUser = { ...user, password: event.detail.password, sendPasswordLink: !event.detail.setInitialPassword } as CreateUserRequest;
+        const newUser = {
+          ...user,
+          password: event.detail.password,
+          sendPasswordLink: !event.detail.setInitialPassword
+        } as CreateUserRequest;
         await userApi.createUser(newUser);
       } else {
         await userApi.updateUser(user);
@@ -151,7 +155,8 @@
       fullName: '',
       id: 0,
       role: UserRole.Standard,
-      username: ''
+      username: '',
+      regions: [{ id: 1, regionName: 'Wien' }]
     };
   }
 </script>
@@ -171,8 +176,7 @@
           class="form-control"
           placeholder="Filter"
           aria-label="Filter"
-          aria-describedby="filter-label"
-        />
+          aria-describedby="filter-label" />
       </div>
       <div class="col">
         <Button class="float-end" on:click={createNewUser}>Neue*r Benutzer*in</Button>
@@ -202,15 +206,13 @@
                   type="button"
                   class="btn btn-sm btn-flat btn-outline-primary"
                   title="Benutzer*in bearbeiten"
-                  on:click={() => showEditModal(user)}><Fa icon={faEdit} /></button
-                >
+                  on:click={() => showEditModal(user)}><Fa icon={faEdit} /></button>
                 {#if currentUser && currentUser.id !== user.id}
                   <button
                     type="button"
                     class="btn btn-sm btn-flat btn-outline-danger"
                     title="Benutzer*in löschen"
-                    on:click={() => showDeleteModal(user)}><Fa icon={faTrash} /></button
-                  >
+                    on:click={() => showDeleteModal(user)}><Fa icon={faTrash} /></button>
                 {/if}
               </div>
             </td>
@@ -243,8 +245,7 @@
       user={userToEdit}
       {isNewUser}
       on:cancel={() => (userToEdit = undefined)}
-      on:save={saveUser}
-    />
+      on:save={saveUser} />
   {/if}
   <div class="fixed-bottom mb-4 me-3">
     <div class="d-flex justify-content-end">

@@ -6,7 +6,6 @@
 	"plugins": ["prettier-plugin-svelte"],
 	"pluginSearchDirs": ["."],
 	"overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],
-	"svelteBracketSameLine": true,
 	"svelteBracketNewLine": false,
 	"svelteAllowShorthand": true
 }

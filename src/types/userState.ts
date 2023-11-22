@@ -5,6 +5,7 @@ export interface User {
     displayName: string,
     email: string,
     token: string,
+    regionIds: number[],
 }
 
 export interface UserState {

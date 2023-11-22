@@ -6,6 +6,7 @@ export interface UserDto {
     username: string,
     email: string | undefined | null,
     fullName: string,
+    regions: RegionDto[],
 };
 
 export interface CreateUserRequest extends UserWithPasswordDto {
@@ -14,4 +15,9 @@ export interface CreateUserRequest extends UserWithPasswordDto {
 
 export interface UserWithPasswordDto extends UserDto {
     password: string,
+}
+
+export interface RegionDto {
+    id: number,
+    regionName: string,
 }

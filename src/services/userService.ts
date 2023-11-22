@@ -26,6 +26,7 @@ export class UserService {
                         id: tokenData.uid,
                         role: tokenData.role,
                         token: response.token,
+                        regionIds: tokenData.regionIds,
                     },
                 };
                 userStore.set(userState);
