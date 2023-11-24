@@ -195,8 +195,8 @@
           <Button size="sm" color="danger" on:click={() => (electionToDelete = election)}>
             <Fa icon={faRemove} class="me-2" />Löschen</Button>
         {:else if election.electionState === ElectionState.Counting}
-          <Button size="sm" color="info" on:click={() => alert('todo')}>
-            <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</Button>
+          <a class="button btn btn-sm btn-info" href={`vote-count?electionId=${election.id}`}>
+            <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</a>
           {#if currentUser?.role === UserRole.Admin}
             <Button
               size="sm"

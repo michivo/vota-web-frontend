@@ -1,12 +1,8 @@
-export interface Candidate {
-    id: number,
-    name: string,
-    gender: 'male' | 'female' | 'diverse',
-}
+import type { CandidateDto } from "./api/electionDto";
 
 export interface CandidateList {
     id: number,
     name: string,
-    items: Candidate[],
+    items: CandidateDto[],
     title: string,
 }
