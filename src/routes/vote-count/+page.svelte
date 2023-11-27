@@ -3,7 +3,10 @@
   import { dndzone } from 'svelte-dnd-action';
   import type { CandidateList } from '../../types/candidate';
   import {
+    Accordion,
+    AccordionItem,
     Button,
+    Col,
     FormGroup,
     InputGroup,
     InputGroupText,
@@ -11,11 +14,18 @@
     ModalBody,
     ModalFooter,
     ModalHeader,
+    Row,
     Toast,
     ToastHeader
   } from 'sveltestrap';
   import { userStore } from '../../stores/userStore';
-  import { faArrowDown, faArrowLeft, faArrowRight, faArrowUp, faArrowUp19, faX } from '@fortawesome/free-solid-svg-icons';
+  import {
+    faArrowDown,
+    faArrowRight,
+    faArrowUp,
+    faCheck,
+    faX
+  } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import { onDestroy, onMount } from 'svelte';
   import { browser } from '$app/environment';
@@ -36,6 +46,7 @@
   let electionId = 0;
   let infoMessage = '';
   let errorMessage = '';
+  let stationSettingsOpen = true;
 
   const unsubscribeUser = userStore.subscribe(
     (val) => (currentUser = val.isLoggedIn ? val.user : undefined)
@@ -122,13 +133,13 @@
     board[1].items[index - 1] = temp;
     board = [...board];
   }
-  
+
   function moveCandidateDown(index: number) {
     const temp = board[1].items[index];
     board[1].items[index] = board[1].items[index + 1];
     board[1].items[index + 1] = temp;
     board = [...board];
-  }  
+  }
 
   async function submitVote() {
     try {
@@ -153,18 +164,15 @@
       };
       const ballotApi = new BallotApi();
       await ballotApi.addBallot(ballot);
-      if(ballotIdentifier) {
+      if (ballotIdentifier) {
         infoMessage = `Wahlzettel mit Nummer ${ballotIdentifier} wurde erfolgreich erfasst`;
-      }
-      else {
+      } else {
         infoMessage = 'Wahlzettel wurde erfolgreich erfasst';
       }
-    }
-    catch(error: unknown) {
+    } catch (error: unknown) {
       const apiError = error as ApiError;
       errorMessage = apiError.message;
-    }
-    finally {
+    } finally {
       board[0].items = [...originalList];
       board[1].items = [];
       showConfirmation = false;
@@ -175,29 +183,57 @@
   function cancel() {
     showConfirmation = false;
   }
+
+  function formatStationInfo() {
+    const trimmedPeople = additionalPeople.trim();
+    const trimmedStation = ballotStationName.trim();
+    const currentUserName  = currentUser?.displayName || currentUser?.name;
+    if(!trimmedPeople && !trimmedStation) {
+      return `Zählstelle mit ${currentUserName}`;
+    }
+    if(!trimmedPeople) {
+      return `Zählstelle ${trimmedStation}`;
+    }
+    if(!trimmedStation) {
+      return `Unbenannte Zählstelle mit ${currentUserName}, ${additionalPeople}`;
+    }
+    return `Zählstelle ${trimmedStation} mit ${currentUserName}, ${additionalPeople}`;
+  }
 </script>
 
 <div>
   <h1>Kandidat*innenauswahl</h1>
-  <div class="mb-3">
-    <label for="ballotStationInput" class="form-label">Zählstelle</label>
-    <input
-      type="text"
-      class="form-control form-control-lg"
-      bind:value={ballotStationName}
-      id="ballotStationInput" />
-  </div>
-  <div class="mb-3">
-    <label for="additionalPeopleInput" class="form-label"
-      >Personen an der Zählstelle (zusätzlich zu {currentUser?.displayName ||
-        currentUser?.name ||
-        ''})</label>
-    <input
-      type="text"
-      class="form-control form-control-lg"
-      bind:value={additionalPeople}
-      id="votingStationInput" />
-  </div>
+  <Accordion stayOpen>
+    <AccordionItem on:toggle={() => stationSettingsOpen = !stationSettingsOpen} bind:active={stationSettingsOpen} 
+      header={stationSettingsOpen ? 'Zählstelle' : formatStationInfo()}>
+      <FormGroup>
+        <label for="additionalPeopleInput" class="form-label"
+          >Personen an der Zählstelle (zusätzlich zu {currentUser?.displayName ||
+            currentUser?.name ||
+            ''})</label>
+        <input
+          type="text"
+          class="form-control form-control-lg"
+          bind:value={additionalPeople}
+          id="votingStationInput" />
+      </FormGroup>
+      <Row class="align-items-end">
+        <Col xs="11">
+          <FormGroup>
+            <label for="ballotStationInput" class="form-label">Zählstelle</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              bind:value={ballotStationName}
+              id="ballotStationInput" />
+          </FormGroup>
+        </Col>
+        <Col xs="1">
+          <Button color="primary" class="mb-4" on:click={() => stationSettingsOpen = false}><Fa icon={faCheck} /></Button>
+        </Col>
+      </Row>
+    </AccordionItem>
+  </Accordion>
   <div class="selection-panel">
     {#each board as column (column.id)}
       <div class="candidates pb-5" animate:flip={{ duration: flipDurationMs }}>
@@ -223,18 +259,18 @@
                   on:click={() => pushCandidate(item)}><Fa icon={faArrowRight} /></button>
               {:else}
                 <div>
-                <button
-                  class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
-                  disabled={index === 0}
-                  on:click={() => moveCandidateUp(index)}><Fa icon={faArrowUp} /></button>
-                <button
-                  class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
-                  disabled={index === column.items.length - 1}
-                  on:click={() => moveCandidateDown(index)}><Fa icon={faArrowDown} /></button>                                    
-                <button
-                  class="btn-sm btn-warning btn m-0 me-2 pt-0 vote-button"
-                  on:click={() => popCandidate(item)}><Fa icon={faX} /></button>                
-                </div>                  
+                  <button
+                    class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
+                    disabled={index === 0}
+                    on:click={() => moveCandidateUp(index)}><Fa icon={faArrowUp} /></button>
+                  <button
+                    class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
+                    disabled={index === column.items.length - 1}
+                    on:click={() => moveCandidateDown(index)}><Fa icon={faArrowDown} /></button>
+                  <button
+                    class="btn-sm btn-warning btn m-0 me-2 pt-0 vote-button"
+                    on:click={() => popCandidate(item)}><Fa icon={faX} /></button>
+                </div>
               {/if}
             </div>
           {/each}
@@ -331,13 +367,13 @@
   }
 
   .candidate {
-    margin: 1rem;
+    margin: 0.25rem;
     height: 2.5rem;
     border-radius: 1rem;
     border: 1px solid #000;
     vertical-align: middle;
-    padding-top: 0.3rem;
-    padding-left: 1rem;
+    padding: 0.1rem 0 0 1rem;
+    height: 2rem;
     background-color: #fff;
   }
 
