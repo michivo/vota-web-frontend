@@ -2,17 +2,29 @@
   import { flip } from 'svelte/animate';
   import { dndzone } from 'svelte-dnd-action';
   import type { CandidateList } from '../../types/candidate';
-  import { Button, InputGroup, Modal, ModalBody, ModalFooter, ModalHeader } from 'sveltestrap';
+  import {
+    Button,
+    FormGroup,
+    InputGroup,
+    InputGroupText,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader,
+    Toast,
+    ToastHeader
+  } from 'sveltestrap';
   import { userStore } from '../../stores/userStore';
-  import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+  import { faArrowDown, faArrowLeft, faArrowRight, faArrowUp, faArrowUp19, faX } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import { onDestroy, onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { ElectionApi } from '../../services/electionApi';
   import type { CandidateDto } from '../../types/api/electionDto';
-    import type { BallotWithVotesDto } from '../../types/api/ballotDto';
-    import type { User } from '../../types/userState';
-    import { BallotApi } from '../../services/ballotApi';
+  import type { BallotWithVotesDto } from '../../types/api/ballotDto';
+  import type { User } from '../../types/userState';
+  import { BallotApi } from '../../services/ballotApi';
+  import type { ApiError } from '../../types/api/apiError';
 
   const flipDurationMs = 200;
 
@@ -22,6 +34,8 @@
   let currentUser = undefined as User | null | undefined;
   let ballotIdentifier = '';
   let electionId = 0;
+  let infoMessage = '';
+  let errorMessage = '';
 
   const unsubscribeUser = userStore.subscribe(
     (val) => (currentUser = val.isLoggedIn ? val.user : undefined)
@@ -102,11 +116,25 @@
     board = [...board];
   }
 
+  function moveCandidateUp(index: number) {
+    const temp = board[1].items[index];
+    board[1].items[index] = board[1].items[index - 1];
+    board[1].items[index - 1] = temp;
+    board = [...board];
+  }
+  
+  function moveCandidateDown(index: number) {
+    const temp = board[1].items[index];
+    board[1].items[index] = board[1].items[index + 1];
+    board[1].items[index + 1] = temp;
+    board = [...board];
+  }  
+
   async function submitVote() {
     try {
       const ballot: BallotWithVotesDto = {
         additionalPeople: additionalPeople,
-        ballotIdentifier: ballotIdentifier,
+        ballotIdentifier: ballotStationName + ballotIdentifier,
         ballotStation: ballotStationName,
         countingUserId: currentUser!.id,
         electionId: electionId,
@@ -120,12 +148,23 @@
           ballotId: 0,
           candidateId: c.id,
           candidateName: c.name,
-          order: index + 1,
-        })),
+          order: index + 1
+        }))
       };
       const ballotApi = new BallotApi();
       await ballotApi.addBallot(ballot);
-    } finally {
+      if(ballotIdentifier) {
+        infoMessage = `Wahlzettel mit Nummer ${ballotIdentifier} wurde erfolgreich erfasst`;
+      }
+      else {
+        infoMessage = 'Wahlzettel wurde erfolgreich erfasst';
+      }
+    }
+    catch(error: unknown) {
+      const apiError = error as ApiError;
+      errorMessage = apiError.message;
+    }
+    finally {
       board[0].items = [...originalList];
       board[1].items = [];
       showConfirmation = false;
@@ -150,7 +189,9 @@
   </div>
   <div class="mb-3">
     <label for="additionalPeopleInput" class="form-label"
-      >Personen an der Zählstelle (zusätzlich zu {currentUser?.displayName || currentUser?.name || ''})</label>
+      >Personen an der Zählstelle (zusätzlich zu {currentUser?.displayName ||
+        currentUser?.name ||
+        ''})</label>
     <input
       type="text"
       class="form-control form-control-lg"
@@ -181,9 +222,19 @@
                   class="btn-sm btn-primary btn m-0 me-2 pt-0 vote-button"
                   on:click={() => pushCandidate(item)}><Fa icon={faArrowRight} /></button>
               {:else}
+                <div>
+                <button
+                  class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
+                  disabled={index === 0}
+                  on:click={() => moveCandidateUp(index)}><Fa icon={faArrowUp} /></button>
+                <button
+                  class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
+                  disabled={index === column.items.length - 1}
+                  on:click={() => moveCandidateDown(index)}><Fa icon={faArrowDown} /></button>                                    
                 <button
                   class="btn-sm btn-warning btn m-0 me-2 pt-0 vote-button"
-                  on:click={() => popCandidate(item)}><Fa icon={faArrowLeft} /></button>
+                  on:click={() => popCandidate(item)}><Fa icon={faX} /></button>                
+                </div>                  
               {/if}
             </div>
           {/each}
@@ -191,12 +242,19 @@
       </div>
     {/each}
   </div>
-  <label for="ballotIdentifier" class="form-label">Stimmzettel-Nummer</label>
-  <input
-    type="text"
-    class="form-control form-control-lg mb-3"
-    bind:value={ballotIdentifier}
-    id="ballotIdentifier" />
+  <FormGroup>
+    <label for="ballotIdentifier" class="form-label">Stimmzettel-Nummer</label>
+    <InputGroup>
+      {#if ballotStationName}
+        <InputGroupText>{ballotStationName}</InputGroupText>
+      {/if}
+      <input
+        type="text"
+        class="form-control form-control-lg"
+        bind:value={ballotIdentifier}
+        id="ballotIdentifier" />
+    </InputGroup>
+  </FormGroup>
   <Button color="secondary" size="lg" class="w-100" on:click={showConfirmationModal}
     >Stimmzettel erfassen</Button>
   <Modal isOpen={showConfirmation} toggle={cancel}>
@@ -204,7 +262,7 @@
     <ModalBody>
       Bitte überprüfe die Stimme sorgfältig:<br />
       {#if !!ballotIdentifier}
-        Stimmzettel-Nummer: <b>{ballotIdentifier}</b>
+        Stimmzettel-Nummer: <b>{ballotStationName + ballotIdentifier}</b>
       {:else}
         Sie haben <b>keine</b> Stimmzettel-Nummer angegeben!
       {/if}
@@ -223,6 +281,23 @@
       <Button color="secondary" on:click={cancel}>Abbrechen</Button>
     </ModalFooter>
   </Modal>
+
+  <Modal isOpen={!!errorMessage} toggle={() => (errorMessage = '')}>
+    <ModalHeader toggle={() => (errorMessage = '')}>Fehler beim Erfassen der Stimme</ModalHeader>
+    <ModalBody>
+      {errorMessage}
+    </ModalBody>
+    <ModalFooter>
+      <Button color="danger" on:click={() => (errorMessage = '')}>OK</Button>
+    </ModalFooter>
+  </Modal>
+  <div class="fixed-bottom mb-4 me-3">
+    <div class="d-flex justify-content-center">
+      <Toast autohide isOpen={!!infoMessage} on:close={() => (infoMessage = '')}>
+        <ToastHeader icon="success">{infoMessage}</ToastHeader>
+      </Toast>
+    </div>
+  </div>
 </div>
 
 <style>
