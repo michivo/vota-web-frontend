@@ -127,7 +127,7 @@
                   <Fa icon={faAngleDown} />
                 </Button>
               </td>
-              <td contenteditable="true" bind:innerHTML={candidate.name} />
+              <td><input type="text" class="w-100 form-control" bind:value={candidate.name} /></td>
               <td class="gender-col">
                 <select class="form-select" id="roleSelect" bind:value={candidate.gender}>
                   <option value={Gender.Female}>Weiblich</option>
@@ -174,5 +174,9 @@
 
   .actions-col {
     width: 7rem;
+  }
+
+  div.single-line {
+    display: inline-block;
   }
 </style>
