@@ -1,5 +1,5 @@
 function getBaseUrl() : string {
-    return 'http://localhost:31401/api';
+    return 'http://localhost:10081/api';
 }
 
 export { getBaseUrl };

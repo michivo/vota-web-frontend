@@ -33,20 +33,10 @@
   }
 
   function getErrorMessage(err: any, activity: string): string {
-    if (!err?.code) {
-      return 'Unerwarteter Fehler ' + activity;
+    if(err && err.message) {
+      return err.message;
     }
-
-    switch (err.code) {
-      case 'auth/email-already-in-use':
-        return 'Mit dieser Adresse ist bereits ein Account verknüpft.';
-      case 'auth/weak-password':
-        return 'Bitte wählen Sie ein stärkeres Passwort (min. 6 Zeichen)';
-      case 'auth/invalid-login-credentials':
-        return 'Bitte prüfen Sie Ihren E-Mail-Adresse und Ihr Passwort';
-      default:
-        return 'Fehler ' + activity + ': ' + err.code;
-    }
+    return 'Unerwarteter Fehler ' + activity;
   }
 </script>
 

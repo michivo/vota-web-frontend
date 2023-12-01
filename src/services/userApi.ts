@@ -13,9 +13,11 @@ export class UserApi {
             },
             body: JSON.stringify(request),
         });
-
-        const responseData = await response.json();
-        return responseData as SignInResponse;
+        if (response.status === 200) {
+            const responseData = await response.json();
+            return responseData as SignInResponse;
+        }
+        throw new Error('Login fehlgeschlagen.');
     }
 
     public async getAllUsers(): Promise<UserDto[]> {
@@ -53,7 +55,7 @@ export class UserApi {
             headers: getAuthHeader(),
             body: JSON.stringify({ challenge, password }),
         }));
-    }    
+    }
 
     public async updateUser(user: UserDto): Promise<void> {
         const baseUrl = getBaseUrl();
