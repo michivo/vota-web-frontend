@@ -4,7 +4,7 @@
 
 Run
 
-    docker built -t vota_frontend .
+    docker build -t vota_frontend .
 
 to build the Docker container. Run 
 
