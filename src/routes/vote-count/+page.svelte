@@ -8,8 +8,10 @@
     Button,
     Col,
     FormGroup,
+    Input,
     InputGroup,
     InputGroupText,
+    Label,
     Modal,
     ModalBody,
     ModalFooter,
@@ -35,6 +37,7 @@
   import type { User } from '../../types/userState';
   import { BallotApi } from '../../services/ballotApi';
   import type { ApiError } from '../../types/api/apiError';
+  import { validate_each_argument } from 'svelte/internal';
 
   const flipDurationMs = 200;
 
@@ -42,11 +45,12 @@
   let ballotStationName = '';
   let additionalPeople = '';
   let currentUser = undefined as User | null | undefined;
-  let ballotIdentifier = '';
+  let ballotIdentifier = '1';
   let electionId = 0;
   let infoMessage = '';
   let errorMessage = '';
   let stationSettingsOpen = true;
+  let ballotValid = true;
 
   const unsubscribeUser = userStore.subscribe(
     (val) => (currentUser = val.isLoggedIn ? val.user : undefined)
@@ -141,17 +145,25 @@
     board = [...board];
   }
 
+  function getFullBallotIdentifier() {
+    if (!ballotStationName?.trim()) {
+      return ballotIdentifier;
+    }
+    return `${ballotStationName.trim()}-${ballotIdentifier.trim()}`;
+  }
+
   async function submitVote() {
+    const fullIdentifier = getFullBallotIdentifier();
     try {
       const ballot: BallotWithVotesDto = {
         additionalPeople: additionalPeople,
-        ballotIdentifier: ballotStationName + ballotIdentifier,
+        ballotIdentifier: fullIdentifier,
         ballotStation: ballotStationName,
         countingUserId: currentUser!.id,
         electionId: electionId,
         countingUserName: currentUser!.displayName || currentUser?.name || '',
         notes: '',
-        isValid: true,
+        isValid: ballotValid && selected.length > 0,
         dateCreated: new Date(),
         id: 0,
         votes: selected.map((c, index) => ({
@@ -164,20 +176,29 @@
       };
       const ballotApi = new BallotApi();
       await ballotApi.addBallot(ballot);
-      if (ballotIdentifier) {
+      if (fullIdentifier) {
         infoMessage = `Wahlzettel mit Nummer ${ballotIdentifier} wurde erfolgreich erfasst`;
       } else {
         infoMessage = 'Wahlzettel wurde erfolgreich erfasst';
       }
+      board[0].items = [...originalList];
+      board[1].items = [];
+      ballotIdentifier = getNextIdentifier();
+      ballotValid = true;
     } catch (error: unknown) {
       const apiError = error as ApiError;
       errorMessage = apiError.message;
     } finally {
-      board[0].items = [...originalList];
-      board[1].items = [];
       showConfirmation = false;
-      ballotIdentifier = '';
     }
+  }
+
+  function getNextIdentifier() {
+    if (isNaN(+ballotIdentifier)) {
+      return '';
+    }
+
+    return (parseInt(ballotIdentifier) + 1).toLocaleString();
   }
 
   function cancel() {
@@ -187,14 +208,14 @@
   function formatStationInfo() {
     const trimmedPeople = additionalPeople.trim();
     const trimmedStation = ballotStationName.trim();
-    const currentUserName  = currentUser?.displayName || currentUser?.name;
-    if(!trimmedPeople && !trimmedStation) {
+    const currentUserName = currentUser?.displayName || currentUser?.name;
+    if (!trimmedPeople && !trimmedStation) {
       return `Zählstelle mit ${currentUserName}`;
     }
-    if(!trimmedPeople) {
+    if (!trimmedPeople) {
       return `Zählstelle ${trimmedStation}`;
     }
-    if(!trimmedStation) {
+    if (!trimmedStation) {
       return `Unbenannte Zählstelle mit ${currentUserName}, ${additionalPeople}`;
     }
     return `Zählstelle ${trimmedStation} mit ${currentUserName}, ${additionalPeople}`;
@@ -204,7 +225,8 @@
 <div>
   <h1>Kandidat*innenauswahl</h1>
   <Accordion stayOpen>
-    <AccordionItem on:toggle={() => stationSettingsOpen = !stationSettingsOpen} bind:active={stationSettingsOpen} 
+    <AccordionItem
+      bind:active={stationSettingsOpen}
       header={stationSettingsOpen ? 'Zählstelle' : formatStationInfo()}>
       <FormGroup>
         <label for="additionalPeopleInput" class="form-label"
@@ -229,60 +251,66 @@
           </FormGroup>
         </Col>
         <Col xs="1">
-          <Button color="primary" class="mb-4" on:click={() => stationSettingsOpen = false}><Fa icon={faCheck} /></Button>
+          <Button color="primary" class="mb-4" on:click={() => (stationSettingsOpen = false)}
+            ><Fa icon={faCheck} /></Button>
         </Col>
       </Row>
     </AccordionItem>
   </Accordion>
-  <div class="selection-panel">
-    {#each board as column (column.id)}
-      <div class="candidates pb-5" animate:flip={{ duration: flipDurationMs }}>
-        <h2>{column.title}</h2>
-        <div
-          class="column-content h-100"
-          use:dndzone={{ items: column.items, flipDurationMs, dropTargetStyle: {} }}
-          on:consider={(e) => handleDndConsiderCards(column.id, e)}
-          on:finalize={(e) => handleDndFinalizeCards(column.id, e)}>
-          {#each column.items as item, index (item.id)}
-            <div
-              class="candidate d-flex justify-content-between"
-              animate:flip={{ duration: flipDurationMs }}>
-              <span>
-                {#if column.id === 2}
-                  <span>{index + 1}.</span>
+  <FormGroup class="mt-3 ps-4">
+    <Input type="checkbox" bind:checked={ballotValid} label="Stimmzettel ist gültig" />
+  </FormGroup>
+  {#if ballotValid}
+    <div class="selection-panel">
+      {#each board as column (column.id)}
+        <div class="candidates pb-5" animate:flip={{ duration: flipDurationMs }}>
+          <h2>{column.title}</h2>
+          <div
+            class="column-content h-100"
+            use:dndzone={{ items: column.items, flipDurationMs, dropTargetStyle: {} }}
+            on:consider={(e) => handleDndConsiderCards(column.id, e)}
+            on:finalize={(e) => handleDndFinalizeCards(column.id, e)}>
+            {#each column.items as item, index (item.id)}
+              <div
+                class="candidate d-flex justify-content-between"
+                animate:flip={{ duration: flipDurationMs }}>
+                <span>
+                  {#if column.id === 2}
+                    <span>{index + 1}.</span>
+                  {/if}
+                  {item.name}
+                </span>
+                {#if column.id === 1}
+                  <button
+                    class="btn-sm btn-primary btn m-0 me-2 pt-0 vote-button"
+                    on:click={() => pushCandidate(item)}><Fa icon={faArrowRight} /></button>
+                {:else}
+                  <div>
+                    <button
+                      class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
+                      disabled={index === 0}
+                      on:click={() => moveCandidateUp(index)}><Fa icon={faArrowUp} /></button>
+                    <button
+                      class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
+                      disabled={index === column.items.length - 1}
+                      on:click={() => moveCandidateDown(index)}><Fa icon={faArrowDown} /></button>
+                    <button
+                      class="btn-sm btn-warning btn m-0 me-2 pt-0 vote-button"
+                      on:click={() => popCandidate(item)}><Fa icon={faX} /></button>
+                  </div>
                 {/if}
-                {item.name}
-              </span>
-              {#if column.id === 1}
-                <button
-                  class="btn-sm btn-primary btn m-0 me-2 pt-0 vote-button"
-                  on:click={() => pushCandidate(item)}><Fa icon={faArrowRight} /></button>
-              {:else}
-                <div>
-                  <button
-                    class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
-                    disabled={index === 0}
-                    on:click={() => moveCandidateUp(index)}><Fa icon={faArrowUp} /></button>
-                  <button
-                    class="btn-sm btn-secondary btn m-0 me-2 pt-0 vote-button"
-                    disabled={index === column.items.length - 1}
-                    on:click={() => moveCandidateDown(index)}><Fa icon={faArrowDown} /></button>
-                  <button
-                    class="btn-sm btn-warning btn m-0 me-2 pt-0 vote-button"
-                    on:click={() => popCandidate(item)}><Fa icon={faX} /></button>
-                </div>
-              {/if}
-            </div>
-          {/each}
+              </div>
+            {/each}
+          </div>
         </div>
-      </div>
-    {/each}
-  </div>
+      {/each}
+    </div>
+  {/if}
   <FormGroup>
     <label for="ballotIdentifier" class="form-label">Stimmzettel-Nummer</label>
     <InputGroup>
       {#if ballotStationName}
-        <InputGroupText>{ballotStationName}</InputGroupText>
+        <InputGroupText>{ballotStationName}-</InputGroupText>
       {/if}
       <input
         type="text"
@@ -296,20 +324,27 @@
   <Modal isOpen={showConfirmation} toggle={cancel}>
     <ModalHeader toggle={cancel}>Stimme überprüfen</ModalHeader>
     <ModalBody>
-      Bitte überprüfe die Stimme sorgfältig:<br />
+      Bitte überprüfen Sie die Stimme sorgfältig:<br />
       {#if !!ballotIdentifier}
-        Stimmzettel-Nummer: <b>{ballotStationName + ballotIdentifier}</b>
+        Stimmzettel-Nummer: <b>{`${ballotStationName}-${ballotIdentifier}`}</b>
       {:else}
         Sie haben <b>keine</b> Stimmzettel-Nummer angegeben!
       {/if}
 
-      <ol>
-        {#each selected as item (item.id)}
-          <li>{item.name}</li>
-        {/each}
-      </ol>
-      {#if selected.length === 0}
-        Sie haben keine Reihung eingegeben - der Stimmzettel wird als <b>ungültige Stimme</b> erfasst.
+      {#if !ballotValid}
+        <p>
+          Dieser Stimmzettel ist <b>ungültig</b>.
+        </p>
+      {:else if selected.length > 0}
+        <ol>
+          {#each selected as item (item.id)}
+            <li>{item.name}</li>
+          {/each}
+        </ol>
+      {:else}
+        <p>
+          Sie haben keine Reihung eingegeben - der Stimmzettel wird als <b>ungültige Stimme</b> erfasst.
+        </p>
       {/if}
     </ModalBody>
     <ModalFooter>
