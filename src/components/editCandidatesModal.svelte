@@ -132,7 +132,6 @@
                 <select class="form-select" id="roleSelect" bind:value={candidate.gender}>
                   <option value={Gender.Female}>Weiblich</option>
                   <option value={Gender.Male}>Männlich</option>
-                  <option value={Gender.Other}>Divers</option>
                 </select></td>
               <td class="actions-col">
                 <Button color="danger" size="sm" on:click={() => removeCandidate(candidateIndex)}

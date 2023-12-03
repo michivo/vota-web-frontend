@@ -57,25 +57,25 @@
               bind:value={election.description}
               placeholder="Optionale ausführliche Beschreibung der Wahl" />
           </FormGroup>
-          <Row>
-            <Col>
-              <FormGroup>
-                <Label for="electedMale"
-                  >Anzahl bereits gewählter Kandidatinnen <Fa icon={faVenus} /></Label>
-                <Input
-                  type="number"
-                  id="electedFemale"
-                  bind:value={election.alreadyElectedFemale} />
-              </FormGroup>
-            </Col>
-            <Col>
-              <FormGroup>
-                <Label for="electedMale"
-                  >Anzahl bereits gewählter Kandidaten <Fa icon={faMars} /></Label>
-                <Input type="number" id="electedMale" bind:value={election.alreadyElectedMale} />
-              </FormGroup>
-            </Col>
-          </Row>
+          <FormGroup>
+            <Label for="electedMale"
+              >Anzahl bereits gewählter Kandidat*innen</Label>
+            <Input
+              type="number"
+              id="electedMale"
+              min="1"
+              bind:value={election.numberOfPositionsToElect} />
+          </FormGroup>
+          <FormGroup>
+            <Label for="electedMale"
+              >Anzahl bereits gewählter für Quotenregel relevanter Kandidatinnen</Label>
+            <Input type="number" id="electedFemale" bind:value={election.alreadyElectedFemale} />
+          </FormGroup>
+          <FormGroup>
+            <Label for="electedMale"
+              >Anzahl bereits gewählter <b>nicht</b> für Quotenregel relevanter Kandidaten</Label>
+            <Input type="number" id="electedMale" bind:value={election.alreadyElectedMale} />
+          </FormGroup>
           <FormGroup>
             <Input
               type="switch"

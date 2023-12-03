@@ -73,6 +73,7 @@
       id: 0,
       alreadyElectedFemale: 0,
       alreadyElectedMale: 0,
+      numberOfPositionsToElect: 1
     };
   }
 

@@ -23,6 +23,7 @@ export interface ElectionDto {
     electionState: ElectionState,
     alreadyElectedMale: number,
     alreadyElectedFemale: number,
+    numberOfPositionsToElect: number,
 };
 
 export interface ElectionWithCandidatesDto extends ElectionDto {
