@@ -263,7 +263,7 @@
   {#if ballotValid}
     <div class="selection-panel">
       {#each board as column (column.id)}
-        <div class="candidates pb-5" animate:flip={{ duration: flipDurationMs }}>
+        <div class="candidates pb-3" animate:flip={{ duration: flipDurationMs }}>
           <h2>{column.title}</h2>
           <div
             class="column-content h-100"

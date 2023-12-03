@@ -77,14 +77,6 @@
             </Col>
           </Row>
           <FormGroup>
-            <Label for="description">Beschreibung</Label>
-            <Input
-              type="text"
-              id="description"
-              bind:value={election.description}
-              placeholder="Optionale ausführliche Beschreibung der Wahl" />
-          </FormGroup>
-          <FormGroup>
             <Input
               type="switch"
               bind:checked={election.enforceGenderParity}
