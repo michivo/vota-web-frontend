@@ -11,7 +11,7 @@ export class ElectionApi {
         });
 
         const responseData = await response.json();
-        for(const item of responseData) {
+        for (const item of responseData) {
             item.dateCreated = new Date(item.dateCreated);
         }
         return responseData as ElectionDto[];
@@ -53,5 +53,15 @@ export class ElectionApi {
             headers: getAuthHeader(),
             body: JSON.stringify(election),
         });
-    }    
+    }
+
+    public async countVotes(election: ElectionDto) {
+        const baseUrl = getBaseUrl();
+        await fetch(`${baseUrl}/v1/elections/${election.id}/countRequests`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ isTestRun: true }),
+        });
+    }
+
 }

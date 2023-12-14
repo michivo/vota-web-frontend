@@ -137,7 +137,10 @@
 
   async function updateElectionState() {
     try {
-      if (electionToUpdateState) {
+      if(electionToUpdateState?.electionState === ElectionState.CountingComplete) {
+        await electionApi.countVotes(electionToUpdateState);
+      }
+      else if (electionToUpdateState) {
         await electionApi.updateElection(electionToUpdateState);
       }
     } finally {
