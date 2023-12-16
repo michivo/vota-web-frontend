@@ -166,12 +166,14 @@
         isValid: ballotValid && selected.length > 0,
         dateCreated: new Date(),
         id: 0,
+        isDeleted: false,
         votes: selected.map((c, index) => ({
           id: 0,
           ballotId: 0,
           candidateId: c.id,
           candidateName: c.name,
-          order: index + 1
+          ballotOrder: index + 1,
+          order: index + 1,
         }))
       };
       const ballotApi = new BallotApi();

@@ -56,12 +56,12 @@ export class ElectionApi {
         });
     }
 
-    public async countVotes(election: ElectionDto) {
+    public async countVotes(electionId: number, isTestRun: boolean) {
         const baseUrl = getBaseUrl();
-        await fetch(`${baseUrl}/v1/elections/${election.id}/countRequests`, {
+        await fetch(`${baseUrl}/v1/elections/${electionId}/countRequests`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify({ isTestRun: true }),
+            body: JSON.stringify({ isTestRun }),
         });
     }
 
