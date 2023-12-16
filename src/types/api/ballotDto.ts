@@ -21,7 +21,7 @@ export interface BallotItemDto {
     ballotId: number,
     candidateId: number,
     candidateName: string,
-    order: number,
+    ballotOrder: number,
 }
 
 export interface BallotWithVotesDto extends BallotInfoDto {

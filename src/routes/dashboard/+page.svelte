@@ -189,7 +189,7 @@
         {#if election.electionState === ElectionState.Creating && currentUser?.role === UserRole.Admin}
           <Button size="sm" color="primary" on:click={() => editElection(election)}>
             <Fa icon={faGear} class="me-2" />Einstellungen</Button>
-          <Button size="sm" color="info" on:click={() => editCandidates(election)}>
+          <Button size="sm" color="primary" on:click={() => editCandidates(election)}>
             <Fa icon={faUsersGear} class="me-2" />Kandidat*innen</Button>
           <Button
             size="sm"
@@ -199,9 +199,11 @@
           <Button size="sm" color="danger" on:click={() => (electionToDelete = election)}>
             <Fa icon={faRemove} class="me-2" />Löschen</Button>
         {:else if election.electionState === ElectionState.Counting}
-          <a class="button btn btn-sm btn-info" href={`vote-count?electionId=${election.id}`}>
+          <a class="button btn btn-sm btn-primary" href={`vote-count?electionId=${election.id}`}>
             <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</a>
           {#if currentUser?.role === UserRole.Admin}
+            <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/ballots`}>
+              <Fa icon={faListOl} class="me-2" />Kontrollieren</a>          
             <Button
               size="sm"
               color="primary"

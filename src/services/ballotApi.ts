@@ -1,5 +1,5 @@
 import { buildApiError } from '../types/api/apiError';
-import type { BallotInfoDto, BallotWithVotesDto } from '../types/api/ballotDto';
+import type { BallotWithVotesDto } from '../types/api/ballotDto';
 import { getBaseUrl } from './settingsProvider';
 import { getAuthHeader } from './utils';
 
@@ -18,14 +18,14 @@ export class BallotApi {
         }
     }
 
-    public async getAllBallots(electionId: number): Promise<BallotInfoDto[]> {
+    public async getAllBallots(electionId: number): Promise<BallotWithVotesDto[]> {
         const baseUrl = getBaseUrl();
         const response = await fetch(`${baseUrl}/v1/ballots/${electionId}`, {
             method: 'GET',
             headers: getAuthHeader(),
         });
 
-        const responseData = (await response.json()) as BallotInfoDto[];
+        const responseData = (await response.json()) as BallotWithVotesDto[];
         for(const info of responseData) {
             if(info.dateCreated) {
                 info.dateCreated = new Date(info.dateCreated);
