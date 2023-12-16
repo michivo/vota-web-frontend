@@ -1,4 +1,5 @@
 import type { ElectionDto, ElectionWithCandidatesDto } from "../types/api/electionDto";
+import type { VotingResultsDto } from "../types/api/votingResultsDto";
 import { getBaseUrl } from "./settingsProvider";
 import { getAuthHeader } from "./utils";
 
@@ -62,6 +63,18 @@ export class ElectionApi {
             headers: getAuthHeader(),
             body: JSON.stringify({ isTestRun: true }),
         });
+    }
+
+    public async getResults(electionId: number) : Promise<VotingResultsDto[]> {
+        const baseUrl = getBaseUrl();
+        const response = await fetch(`${baseUrl}/v1/elections/${electionId}/results`, {
+            method: 'GET',
+            headers: getAuthHeader(),
+        });
+
+        const responseData = await response.json();
+        responseData.dateCreated = new Date(responseData.dateCreated);
+        return responseData as VotingResultsDto[];
     }
 
 }

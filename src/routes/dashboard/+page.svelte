@@ -11,10 +11,12 @@
   import { userStore } from '../../stores/userStore';
   import {
     faCheckCircle,
+    faClipboardCheck,
     faGear,
     faListOl,
     faRankingStar,
     faRemove,
+    faSquarePollVertical,
     faUsersGear
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
@@ -137,10 +139,7 @@
 
   async function updateElectionState() {
     try {
-      if(electionToUpdateState?.electionState === ElectionState.CountingComplete) {
-        await electionApi.countVotes(electionToUpdateState);
-      }
-      else if (electionToUpdateState) {
+      if (electionToUpdateState) {
         await electionApi.updateElection(electionToUpdateState);
       }
     } finally {
@@ -193,7 +192,7 @@
             <Fa icon={faUsersGear} class="me-2" />Kandidat*innen</Button>
           <Button
             size="sm"
-            color="primary"
+            color="secondary"
             on:click={() => confirmUpdateElectionState(election, ElectionState.Counting)}>
             <Fa icon={faCheckCircle} class="me-2" />Freigeben</Button>
           <Button size="sm" color="danger" on:click={() => (electionToDelete = election)}>
@@ -203,12 +202,19 @@
             <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</a>
           {#if currentUser?.role === UserRole.Admin}
             <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/ballots`}>
-              <Fa icon={faListOl} class="me-2" />Kontrollieren</a>          
+              <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
             <Button
               size="sm"
-              color="primary"
+              color="secondary"
               on:click={() => confirmUpdateElectionState(election, ElectionState.CountingComplete)}>
               <Fa icon={faCheckCircle} class="me-2" />Auswerten</Button>
+          {/if}
+        {:else if election.electionState === ElectionState.CountingComplete}
+          {#if currentUser?.role === UserRole.Admin}
+            <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/ballots`}>
+              <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
+            <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/tally`}>
+              <Fa icon={faSquarePollVertical} class="me-2" />Ergebnis bestimmen</a>
           {/if}
         {/if}
       </div>
