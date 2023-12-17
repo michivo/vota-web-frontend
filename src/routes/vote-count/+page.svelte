@@ -179,7 +179,7 @@
       const ballotApi = new BallotApi();
       await ballotApi.addBallot(ballot);
       if (fullIdentifier) {
-        infoMessage = `Wahlzettel mit Nummer ${ballotIdentifier} wurde erfolgreich erfasst`;
+        infoMessage = `Wahlzettel mit Nummer ${ballotStationName ? ballotStationName + '-' : ''}${ballotIdentifier} wurde erfolgreich erfasst`;
       } else {
         infoMessage = 'Wahlzettel wurde erfolgreich erfasst';
       }
@@ -259,6 +259,19 @@
       </Row>
     </AccordionItem>
   </Accordion>
+  <FormGroup class="mt-2 mx-3">
+    <label for="ballotIdentifier" class="form-label mt-2">Stimmzettel-Nummer</label>
+    <InputGroup>
+      {#if ballotStationName}
+        <InputGroupText>{ballotStationName}-</InputGroupText>
+      {/if}
+      <input
+        type="text"
+        class="form-control form-control-lg"
+        bind:value={ballotIdentifier}
+        id="ballotIdentifier" />
+    </InputGroup>
+  </FormGroup>  
   <FormGroup class="mt-3 ps-4">
     <Input type="checkbox" bind:checked={ballotValid} label="Stimmzettel ist gültig" />
   </FormGroup>
@@ -308,19 +321,6 @@
       {/each}
     </div>
   {/if}
-  <FormGroup>
-    <label for="ballotIdentifier" class="form-label">Stimmzettel-Nummer</label>
-    <InputGroup>
-      {#if ballotStationName}
-        <InputGroupText>{ballotStationName}-</InputGroupText>
-      {/if}
-      <input
-        type="text"
-        class="form-control form-control-lg"
-        bind:value={ballotIdentifier}
-        id="ballotIdentifier" />
-    </InputGroup>
-  </FormGroup>
   <Button color="secondary" size="lg" class="w-100" on:click={showConfirmationModal}
     >Stimmzettel erfassen</Button>
   <Modal isOpen={showConfirmation} toggle={cancel}>
