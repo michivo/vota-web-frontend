@@ -158,20 +158,16 @@
     </ModalFooter>
   </Modal>
 
-  <Modal isOpen={!!logToShow} toggle={() => (logToShow = undefined)} size="lg">
+  <Modal isOpen={!!logToShow} toggle={() => (logToShow = undefined)} size="xl">
     <ModalHeader toggle={() => (logToShow = undefined)}
       >Logs {results?.length ? `für ${results[0].electionName}` : ''}</ModalHeader>
     <ModalBody>
       {#if logToShow}
-        <pre>
-          {logToShow.detailedLog}
-        </pre>
+        <pre>{logToShow.detailedLog}</pre>
       {/if}
       {#if logToShow?.errorLog}
         <h3>Fehlerlog</h3>
-        <pre>
-          {logToShow.errorLog}
-        </pre>
+        <pre>{logToShow.errorLog}</pre>
       {/if}
     </ModalBody>
     <ModalFooter>
@@ -179,14 +175,12 @@
     </ModalFooter>
   </Modal>
 
-  <Modal isOpen={!!statsToShow} toggle={() => (statsToShow = undefined)} size="lg">
+  <Modal isOpen={!!statsToShow} toggle={() => (statsToShow = undefined)} size="xl">
     <ModalHeader toggle={() => (statsToShow = undefined)}
       >Statistiken {results?.length ? `für ${results[0].electionName}` : ''}</ModalHeader>
     <ModalBody>
       {#if statsToShow}
-        <pre>
-          {statsToShow.statsData}
-        </pre>
+        <pre>{statsToShow.statsData.trim()}</pre>
       {/if}
     </ModalBody>
     <ModalFooter>
@@ -194,8 +188,8 @@
     </ModalFooter>
   </Modal>
 
-  <Modal isOpen={!!protocolToShow} toggle={() => (protocolToShow = undefined)} size="lg">
-    <ModalHeader toggle={() => (statsToShow = undefined)}
+  <Modal isOpen={!!protocolToShow} toggle={() => (protocolToShow = undefined)} size="xl">
+    <ModalHeader toggle={() => (protocolToShow = undefined)}
       >Protokoll {results?.length ? `für ${results[0].electionName}` : ''}</ModalHeader>
     <ModalBody>
       {#if protocolToShow}

@@ -23,6 +23,7 @@
 
   async function signIn() {
     hasError = false;
+    status = '';
     try {
       await userService.signIn(username, password);
       goto('/dashboard');

@@ -16,7 +16,21 @@
           <svelte:self protocol={message} indentation={indentation + 1} />
         {/if}
       {/each}
-      <li><b>Ergebnis:</b> {protocol.Result}</li>
+      <li class={`result-${indentation + 1}`}><b>Ergebnis:</b> {protocol.Result}</li>
     </ul>
   </div>
 </template>
+
+<style>
+    .result-1 {
+        font-size: 1.5rem;
+    }
+
+    .result-2 {
+        font-size: 1.2rem;
+    }
+
+    .result-3 {
+        font-size: 1.1rem;
+    }
+</style>

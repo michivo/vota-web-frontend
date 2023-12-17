@@ -2,13 +2,14 @@
   import { browser } from '$app/environment';
   import { Button, Form, FormGroup, Input, Label } from 'sveltestrap';
   import { UserApi } from '../../services/userApi';
-    import { redirect } from '@sveltejs/kit';
-    import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation';
 
   let challenge = '';
   let password = '';
   let passwordConfirmation = '';
   let saveClicked = false;
+  let status = '';
+  let hasError = false;
 
   $: passwordsNotMatching =
     saveClicked && !!password && !!passwordConfirmation && password !== passwordConfirmation;
@@ -21,10 +22,17 @@
 
   async function onSave() {
     saveClicked = true;
+    hasError = false;
+    status = '';
     if (!passwordTooShort && !passwordsNotMatching) {
       const userApi = new UserApi();
-      await userApi.setInitialPassword(challenge, password);
-      goto('/');
+      try {
+        await userApi.setInitialPassword(challenge, password);
+        goto('/');
+      } catch (err: any) {
+        hasError = true;
+        status = 'Das Passwort muss mindestens 8 Zeichen lang sein, Groß- und Kleinbuchstaben, mindestens eine Ziffer und ein Sonderzeichen beinhalten.';
+      }
     }
   }
 </script>
@@ -49,6 +57,14 @@
         bind:invalid={passwordsNotMatching}
         feedback="Passwörter stimmen nicht überein" />
     </FormGroup>
+    {#if !!status}
+      <div
+        class="status text-small mb-3"
+        class:text-danger={hasError}
+        class:text-success={!hasError}>
+        <small>{status} </small>
+      </div>
+    {/if}
     <Button type="submit" color="primary" on:click={onSave}>Speichern</Button>
   </Form>
 </div>

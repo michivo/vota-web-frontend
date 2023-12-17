@@ -214,7 +214,7 @@
             <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
             <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/tally`}>
-              <Fa icon={faSquarePollVertical} class="me-2" />Ergebnis bestimmen</a>
+              <Fa icon={faSquarePollVertical} class="me-2" />Ergebnisse</a>
           {/if}
         {/if}
       </div>
