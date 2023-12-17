@@ -2,7 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   import {
     Button,
-    Col,
     Form,
     FormGroup,
     Input,
@@ -11,7 +10,6 @@
     ModalBody,
     ModalFooter,
     ModalHeader,
-    Row
   } from 'sveltestrap';
   import { ElectionType, type ElectionDto } from '../types/api/electionDto';
   import Fa from 'svelte-fa';
@@ -58,24 +56,23 @@
               placeholder="Optionale ausführliche Beschreibung der Wahl" />
           </FormGroup>
           <FormGroup>
-            <Label for="electedMale"
-              >Anzahl bereits gewählter Kandidat*innen</Label>
+            <Label for="numberOfPositionsToElect">Anzahl zu wählender Kandidat*innen</Label>
             <Input
               type="number"
-              id="electedMale"
+              id="numberOfPositionsToElect"
               min="1"
               bind:value={election.numberOfPositionsToElect} />
           </FormGroup>
           <FormGroup>
-            <Label for="electedMale"
-              >Anzahl bereits gewählter für Quotenregel relevanter Kandidatinnen</Label>
+            <Label for="electedFemale"
+              >Anzahl bereits gewählter Kandidatinnen (<Fa icon={faVenus} />)</Label>
             <Input type="number" id="electedFemale" bind:value={election.alreadyElectedFemale} />
           </FormGroup>
           <FormGroup>
             <Label for="electedMale"
-              >Anzahl bereits gewählter <b>nicht</b> für Quotenregel relevanter Kandidaten</Label>
+              >Anzahl bereits gewählter Kandidaten (<Fa icon={faMars} />)</Label>
             <Input type="number" id="electedMale" bind:value={election.alreadyElectedMale} />
-          </FormGroup>
+          </FormGroup>          
           <FormGroup>
             <Input
               type="switch"
