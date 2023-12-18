@@ -96,6 +96,7 @@
       hasError = true;
     } finally {
       loading = false;
+      await refresh();
     }
   }
 
