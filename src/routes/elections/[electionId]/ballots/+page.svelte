@@ -205,8 +205,7 @@
           </small>
         </h2>
         <p>
-          Ausgezählt von {ballotToShow.countingUserName}
-          {ballotToShow.additionalPeople ? `, ${ballotToShow.additionalPeople}` : ''}.<br />
+          Ausgezählt von {ballotToShow.countingUserName}{ballotToShow.additionalPeople ? `, ${ballotToShow.additionalPeople}` : ''}.<br />
           Datum: {ballotToShow.dateCreated.toLocaleString()}
           <br />
         </p>

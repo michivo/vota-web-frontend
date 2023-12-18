@@ -1,8 +1,6 @@
 <script lang="ts">
   import {
     Button,
-    ListGroup,
-    ListGroupItem,
     Modal,
     ModalBody,
     ModalFooter,
@@ -198,10 +196,10 @@
           <Button size="sm" color="danger" on:click={() => (electionToDelete = election)}>
             <Fa icon={faRemove} class="me-2" />Löschen</Button>
         {:else if election.electionState === ElectionState.Counting}
-          <a class="button btn btn-sm btn-primary" href={`vote-count?electionId=${election.id}`}>
+          <a class="button btn btn-sm btn-primary" href={`/vote-count?electionId=${election.id}`}>
             <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</a>
           {#if currentUser?.role === UserRole.Admin}
-            <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/ballots`}>
+            <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
             <Button
               size="sm"
@@ -211,11 +209,11 @@
           {/if}
         {:else if election.electionState === ElectionState.CountingComplete}
           {#if currentUser?.role === UserRole.Admin}
-            <a class="button btn btn-sm btn-primary" href={`vote-count?electionId=${election.id}`}>
+            <a class="button btn btn-sm btn-primary" href={`/vote-count?electionId=${election.id}`}>
               <Fa icon={faListOl} class="me-2" />Stimmen Nachtragen</a>
-            <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/ballots`}>
+            <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
-            <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/tally`}>
+            <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/tally`}>
               <Fa icon={faSquarePollVertical} class="me-2" />Ergebnisse</a>
           {/if}
         {/if}
