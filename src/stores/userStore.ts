@@ -5,7 +5,7 @@ import { parseJwt } from "../services/utils";
 
 export const userStore = writable<UserState>(getInitialState());
 
-function getInitialState() {
+function getInitialState(): UserState {
     if (browser) {
         const storedToken = localStorage.getItem('user');
         if (storedToken) {
@@ -24,6 +24,7 @@ function getInitialState() {
                         id: parsedJwt.uid,
                         role: parsedJwt.role,
                         token: storedToken,
+                        regionIds: [],
                     },
                 };
             }

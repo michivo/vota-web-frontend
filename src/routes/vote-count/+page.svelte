@@ -278,7 +278,7 @@
   {#if ballotValid}
     <div class="selection-panel">
       {#each board as column (column.id)}
-        <div class="candidates pb-3" animate:flip={{ duration: flipDurationMs }}>
+        <div class={`candidates pb-3 candidates-${column.name}`} animate:flip={{ duration: flipDurationMs }}>
           <h2>{column.title}</h2>
           <div
             class="column-content h-100"
@@ -396,12 +396,21 @@
   }
 
   .candidates {
-    background-color: #eef;
     height: 100%;
     width: 100%;
     border-radius: 1rem;
     padding: 1rem;
   }
+
+  .candidates-candidates {
+    border: 2px solid var(--bs-primary);
+    border-radius: 0.5rem;
+  }
+
+  .candidates-selection {
+    border: 2px solid var(--bs-secondary);
+    border-radius: 0.5rem;
+  }  
 
   .candidate {
     margin: 0.25rem;

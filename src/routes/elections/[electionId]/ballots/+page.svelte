@@ -33,6 +33,7 @@
   let ballotToDelete = undefined as BallotWithVotesDto | undefined;
   let ballotToShow = undefined as BallotWithVotesDto | undefined;
   let deleteReason = '';
+  let filter = '';
 
   onMount(refresh);
 
@@ -48,6 +49,12 @@
       loading = false;
     }
   }
+
+  $: filteredBallots = !filter.trim().toLocaleLowerCase()
+    ? ballots.sort(compareBallots)
+    : ballots
+        .filter((b) => b.ballotIdentifier.toLocaleLowerCase().includes(filter.trim().toLocaleLowerCase()))
+        .sort(compareBallots);
 
   function compareBallots(a: BallotInfoDto, b: BallotInfoDto) {
     try {
@@ -96,6 +103,12 @@
   {:else if hasError}
     Fehler beim Laden der Wahlzettel.
   {:else}
+  <div class="mb-3 row">
+    <label for="filter" class="col-sm-1 col-form-label">Filter</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="filter" bind:value={filter}>
+    </div>
+  </div>
     <Table>
       <thead>
         <th>#</th>
@@ -105,7 +118,7 @@
         <th>Aktionen</th>
       </thead>
       <tbody>
-        {#each ballots as ballot}
+        {#each filteredBallots as ballot}
           <tr class={ballot.isDeleted ? 'deleted' : ''}>
             <th scope="row">{ballot.ballotIdentifier}</th>
             <td>
@@ -200,8 +213,7 @@
         {#if ballotToShow.isDeleted}
           <p>
             <b
-              >Gelöscht von {ballotToShow.deleteUserName} am {ballotToShow.dateDeleted
-                ?.toLocaleString()}.<br />
+              >Gelöscht von {ballotToShow.deleteUserName} am {ballotToShow.dateDeleted?.toLocaleString()}.<br />
               Begründung: {ballotToShow.deleteReason}</b>
           </p>
         {/if}

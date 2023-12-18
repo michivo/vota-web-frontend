@@ -100,7 +100,7 @@
       </thead>
       <tbody>
         {#each results as result}
-          <tr>
+          <tr class={result.isTestRun ? 'test' : 'valid'}>
             <td>{result.id}</td>
             <td>{result.dateCreatedUtc.toLocaleString()}</td>
             <td
@@ -208,5 +208,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  tr.valid {
+    font-weight: 700;
   }
 </style>

@@ -174,8 +174,4 @@
   .actions-col {
     width: 7rem;
   }
-
-  div.single-line {
-    display: inline-block;
-  }
 </style>

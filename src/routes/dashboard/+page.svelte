@@ -211,6 +211,8 @@
           {/if}
         {:else if election.electionState === ElectionState.CountingComplete}
           {#if currentUser?.role === UserRole.Admin}
+            <a class="button btn btn-sm btn-primary" href={`vote-count?electionId=${election.id}`}>
+              <Fa icon={faListOl} class="me-2" />Stimmen Nachtragen</a>
             <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
             <a class="button btn btn-sm btn-primary" href={`elections/${election.id}/tally`}>
