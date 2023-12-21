@@ -1,10 +1,13 @@
 <script lang="ts">
   import {
     Button,
+    FormGroup,
+    Input,
     Modal,
     ModalBody,
     ModalFooter,
-    ModalHeader
+    ModalHeader,
+    Table
   } from 'sveltestrap';
   import { userStore } from '../../stores/userStore';
   import {
@@ -40,7 +43,11 @@
   let electionToEditCandidates = undefined as ElectionDto | undefined;
   let electionToDelete = undefined as ElectionDto | undefined;
   let electionToUpdateState = undefined as ElectionDto | undefined;
+  let showArchiveModal = false;
+  let electionsToArchive = [] as Array<ElectionDto & { selected: boolean }>;
   const electionApi = new ElectionApi();
+
+  $: noElectionsToArchive = !electionsToArchive.find((e) => e.selected);
 
   const unsubscribeUser = userStore.subscribe(
     (val) => (currentUser = val.isLoggedIn ? val.user : undefined)
@@ -161,6 +168,17 @@
     }
     await refresh();
   }
+
+  function showModalForArchiving() {
+    showArchiveModal = true;
+    electionsToArchive = elections
+      .filter((e) => e.electionState === ElectionState.CountingComplete)
+      .map((e) => ({ ...e, selected: false }));
+  }
+
+  function archiveElections() {
+    // TODO
+  }
 </script>
 
 <template>
@@ -168,6 +186,11 @@
     <h1 class="mt-5 flex-fill"><Fa icon={faRankingStar} class="me-3" />Wahlen</h1>
     {#if currentUser?.role === UserRole.Admin}
       <Button class="align-self-center" size="lg" on:click={createNewElection}>Neue Wahl</Button>
+      <Button
+        class="align-self-center ms-3"
+        color="primary"
+        size="lg"
+        on:click={showModalForArchiving}>Wahlen archivieren</Button>
     {/if}
   </div>
   {#each elections as election}
@@ -258,6 +281,37 @@
     <ModalFooter>
       <Button color="primary" on:click={updateElectionState}>Ja</Button>
       <Button color="secondary" on:click={() => (electionToUpdateState = undefined)}>Nein</Button>
+    </ModalFooter>
+  </Modal>
+
+  <Modal isOpen={showArchiveModal} toggle={() => (showArchiveModal = false)}>
+    <ModalHeader toggle={() => (showArchiveModal = false)}>Wahlen archivieren</ModalHeader>
+    <ModalBody>
+      <Table>
+        <thead>
+          <tr><th>Archivieren</th><th>Wahl</th></tr>
+        </thead>
+        <tbody>
+          {#each electionsToArchive as election}
+            <tr>
+              <td>
+                <Input
+                  type="checkbox"
+                  bind:checked={election.selected}
+                  aria-label={`Wahl ${election.title} archivieren`} />
+              </td>
+              <td>
+                {election.title}
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </Table>
+    </ModalBody>
+    <ModalFooter>
+      <Button color="primary" bind:disabled={noElectionsToArchive} on:click={archiveElections}
+        >OK</Button>
+      <Button color="secondary" on:click={() => (showArchiveModal = false)}>Abbrechen</Button>
     </ModalFooter>
   </Modal>
 </template>
