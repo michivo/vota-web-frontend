@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Form, FormGroup, Input, Label } from 'sveltestrap';
+  import { Button, Form, FormGroup, Input, Label, Spinner } from 'sveltestrap';
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import { userStore } from '../stores/userStore';
@@ -9,6 +9,8 @@
   let password = '';
   let status = '';
   let hasError = false;
+  let loggingIn = false;
+  let signedIn = false;
   const userService = new UserService();
 
   $: detailsMissing = !username || !password;
@@ -22,19 +24,25 @@
   }
 
   async function signIn() {
+    loggingIn = true;
+    signedIn = false;
+
     hasError = false;
     status = '';
     try {
       await userService.signIn(username, password);
+      signedIn = true;
       goto('/dashboard');
     } catch (err: any) {
       hasError = true;
       status = getErrorMessage(err, 'bei der Anmeldung');
+    } finally {
+      loggingIn = false;
     }
   }
 
   function getErrorMessage(err: any, activity: string): string {
-    if(err && err.message) {
+    if (err && err.message) {
       return err.message;
     }
     return 'Unerwarteter Fehler ' + activity;
@@ -43,28 +51,35 @@
 
 <div class="container main-content">
   <div class="login-form">
-    <Form>
-      <FormGroup>
-        <Label for="username">Benutzer*innenname</Label>
-        <Input id="username" type="text" bind:value={username} />
-      </FormGroup>
-      <FormGroup>
-        <Label for="password">Passwort</Label>
-        <Input id="password" type="password" bind:value={password} />
-      </FormGroup>
-      {#if !!status}
-        <div
-          class="status text-small mb-3"
-          class:text-danger={hasError}
-          class:text-success={!hasError}>
-          <small>{status} </small>
+    {#if loggingIn || signedIn}
+      <Spinner />
+    {:else}
+      <Form>
+        <FormGroup>
+          <Label for="username">Benutzer*innenname</Label>
+          <Input id="username" type="text" bind:value={username} />
+        </FormGroup>
+        <FormGroup>
+          <Label for="password">Passwort</Label>
+          <Input id="password" type="password" bind:value={password} />
+        </FormGroup>
+        {#if !!status}
+          <div
+            class="status text-small mb-3"
+            class:text-danger={hasError}
+            class:text-success={!hasError}>
+            <small>{status} </small>
+          </div>
+        {/if}
+        <div class="buttons">
+          <Button
+            class="flex-grow-1"
+            color="primary"
+            bind:disabled={detailsMissing}
+            on:click={signIn}>Anmelden</Button>
         </div>
-      {/if}
-      <div class="buttons">
-        <Button class="flex-grow-1" color="primary" bind:disabled={detailsMissing} on:click={signIn}
-          >Anmelden</Button>
-      </div>
-    </Form>
+      </Form>
+    {/if}
   </div>
 </div>
 

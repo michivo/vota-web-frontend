@@ -1,14 +1,5 @@
 <script lang="ts">
-  import {
-    Button,
-    FormGroup,
-    Input,
-    Modal,
-    ModalBody,
-    ModalFooter,
-    ModalHeader,
-    Table
-  } from 'sveltestrap';
+  import { Button, Input, Modal, ModalBody, ModalFooter, ModalHeader, Table } from 'sveltestrap';
   import { userStore } from '../../stores/userStore';
   import {
     faCheckCircle,
@@ -33,6 +24,8 @@
   import EditElectionModal from '../../components/editElectionModal.svelte';
   import { UserRole, type User } from '../../types/userState';
   import EditCandidatesModal from '../../components/editCandidatesModal.svelte';
+  import { saveAs } from 'file-saver';
+  import JSZip from 'jszip';
 
   let loading = false;
   let elections = [] as ElectionDto[];
@@ -45,9 +38,19 @@
   let electionToUpdateState = undefined as ElectionDto | undefined;
   let showArchiveModal = false;
   let electionsToArchive = [] as Array<ElectionDto & { selected: boolean }>;
+  let archiveError = '';
+  let archiving = false;
+  let showArchived = false;
+
   const electionApi = new ElectionApi();
 
-  $: noElectionsToArchive = !electionsToArchive.find((e) => e.selected);
+  $: noElectionsToArchive = !electionsToArchive.find((e) => e.selected) || archiving;
+  $: filteredElections =
+    currentUser?.role === UserRole.Admin
+      ? showArchived
+        ? elections
+        : elections.filter((e) => e.electionState !== ElectionState.Done)
+      : elections.filter((e) => e.electionState === ElectionState.Counting);
 
   const unsubscribeUser = userStore.subscribe(
     (val) => (currentUser = val.isLoggedIn ? val.user : undefined)
@@ -176,8 +179,48 @@
       .map((e) => ({ ...e, selected: false }));
   }
 
-  function archiveElections() {
-    // TODO
+  async function archiveElections() {
+    try {
+      archiving = true;
+      archiveError = '';
+      var zip = new JSZip();
+
+      for (const election of electionsToArchive) {
+        const results = await electionApi.getResults(election.id);
+        const validResults = results
+          .filter((r) => r.success && !r.isTestRun)
+          .sort((a, b) => b.id - a.id);
+        if (validResults.length > 0) {
+          const lastValidResult = validResults[0];
+          const folderName = `${election.id}_${election.title.replaceAll(/\W/g, '_')}`;
+          zip.folder(folderName)?.file('voterlist.csv', lastValidResult.voterListCsv);
+          zip.folder(folderName)?.file('votes.csv', lastValidResult.votesCsv);
+          zip.folder(folderName)?.file('log.txt', lastValidResult.detailedLog);
+          if (lastValidResult.errorLog) {
+            zip.folder(folderName)?.file('errorLog.txt', lastValidResult.errorLog);
+          }
+          zip.folder(folderName)?.file('result.json', JSON.stringify(lastValidResult.protocol));
+          if (lastValidResult.statsData) {
+            zip.folder(folderName)?.file('stats.txt', lastValidResult.statsData);
+          }
+        }
+      }
+      var zipped = await zip.generateAsync({ type: 'blob' });
+      const filename =
+        electionsToArchive.length === 1
+          ? `${electionsToArchive[0].title.replaceAll(/\W/g, '_')}.zip`
+          : 'archiv.zip';
+      saveAs(zipped, filename);
+      for (const election of electionsToArchive) {
+        await electionApi.updateElection({ ...election, electionState: ElectionState.Done });
+      }
+      showArchiveModal = false;
+    } catch (ex: any) {
+      console.error(ex);
+      archiveError = 'Fehler beim Archivieren der Wahl: ' + (ex?.message ?? 'Unbekannter Fehler');
+    } finally {
+      archiving = false;
+    }
   }
 </script>
 
@@ -193,7 +236,7 @@
         on:click={showModalForArchiving}>Wahlen archivieren</Button>
     {/if}
   </div>
-  {#each elections as election}
+  {#each filteredElections as election}
     <hr class="mt-5 mb-3" />
     <div class="d-flex mt-3">
       <div class="flex-fill">
@@ -240,10 +283,23 @@
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/tally`}>
               <Fa icon={faSquarePollVertical} class="me-2" />Ergebnisse</a>
           {/if}
+          {:else if election.electionState === ElectionState.Done}
+          {#if currentUser?.role === UserRole.Admin}
+            <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
+              <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
+            <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/tally`}>
+              <Fa icon={faSquarePollVertical} class="me-2" />Ergebnisse</a>
+          {/if}
         {/if}
       </div>
     </div>
   {/each}
+  <hr />
+  <div class="d-flex justify-content-end">
+    <Input id="showArchivedCheckbox" type="checkbox" bind:checked={showArchived} />
+    <label for="showArchivedCheckbox"> Archivierte Wahlen anzeigen </label>
+  </div>
+
   <EditElectionModal
     election={electionToEdit}
     {isNewElection}
@@ -307,6 +363,9 @@
           {/each}
         </tbody>
       </Table>
+      {#if !!archiveError}
+        <p class="text-danger">{archiveError}</p>
+      {/if}
     </ModalBody>
     <ModalFooter>
       <Button color="primary" bind:disabled={noElectionsToArchive} on:click={archiveElections}
