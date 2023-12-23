@@ -186,6 +186,9 @@
       var zip = new JSZip();
 
       for (const election of electionsToArchive) {
+        if (!election.selected) {
+          continue;
+        }
         const votingResults = await electionApi.getResults(election.id);
         const validResults = votingResults.results
           .filter((r) => r.success && !r.isTestRun)
@@ -212,7 +215,9 @@
           : 'archiv.zip';
       saveAs(zipped, filename);
       for (const election of electionsToArchive) {
-        await electionApi.updateElection({ ...election, electionState: ElectionState.Done });
+        if (election.selected) {
+          await electionApi.updateElection({ ...election, electionState: ElectionState.Done });
+        }
       }
       showArchiveModal = false;
     } catch (ex: any) {
@@ -220,6 +225,7 @@
       archiveError = 'Fehler beim Archivieren der Wahl: ' + (ex?.message ?? 'Unbekannter Fehler');
     } finally {
       archiving = false;
+      await refresh();
     }
   }
 </script>
@@ -283,7 +289,7 @@
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/tally`}>
               <Fa icon={faSquarePollVertical} class="me-2" />Ergebnisse</a>
           {/if}
-          {:else if election.electionState === ElectionState.Done}
+        {:else if election.electionState === ElectionState.Done}
           {#if currentUser?.role === UserRole.Admin}
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
