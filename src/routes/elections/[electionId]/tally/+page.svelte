@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { ElectionApi } from '../../../../services/electionApi';
-  import type { VotingResultsDto } from '../../../../types/api/votingResultsDto';
+  import type { VotingResultDto, VotingResultsDto } from '../../../../types/api/votingResultsDto';
   import {
     Button,
     FormGroup,
@@ -21,20 +21,23 @@
     faSquarePollVertical
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-    import VotingProtocol from '../../../../components/votingProtocol.svelte';
+  import VotingProtocol from '../../../../components/votingProtocol.svelte';
+  import { ElectionState } from '../../../../types/api/electionDto';
 
   /** @type {import('./$types').PageData} */
   export let data: { electionId: number };
 
   const electionApi = new ElectionApi();
-  let results = [] as VotingResultsDto[];
+  let results = [] as VotingResultDto[];
+  let title = '';
+  let state = ElectionState.None;
   let loading = false;
   let hasError = false;
   let countResults = false;
   let isTestRun = true;
-  let logToShow = undefined as VotingResultsDto | undefined;
-  let statsToShow = undefined as VotingResultsDto | undefined;
-  let protocolToShow = undefined as VotingResultsDto | undefined;
+  let logToShow = undefined as VotingResultDto | undefined;
+  let statsToShow = undefined as VotingResultDto | undefined;
+  let protocolToShow = undefined as VotingResultDto | undefined;
 
   onMount(refresh);
 
@@ -42,7 +45,10 @@
     loading = true;
     hasError = false;
     try {
-      results = await electionApi.getResults(data.electionId);
+      const votingResults = await electionApi.getResults(data.electionId);
+      title = votingResults.electionTitle;
+      state = votingResults.electionState;
+      results = votingResults.results;
       results = results.sort((a, b) => a.id - b.id);
     } catch {
       hasError = true;
@@ -66,23 +72,25 @@
     }
   }
 
-  function showResults(result: VotingResultsDto): void {
+  function showResults(result: VotingResultDto): void {
     protocolToShow = result;
   }
 
-  function showLogs(result: VotingResultsDto): void {
+  function showLogs(result: VotingResultDto): void {
     logToShow = result;
   }
 
-  function showStats(result: VotingResultsDto): void {
+  function showStats(result: VotingResultDto): void {
     statsToShow = result;
   }
 </script>
 
 <template>
-  <h1 class="my-3">Ergebnisse {results?.length ? results[0].electionName : ''}</h1>
-  <Button color="secondary" on:click={() => confirmStartCount()}>
-    <Fa icon={faListOl} class="me-2" />Auswertung mit VOTA starten</Button>
+  <h1 class="my-3">Ergebnisse {title ? `- ${title}` : ''}</h1>
+  {#if !loading && state === ElectionState.CountingComplete}
+    <Button color="secondary" on:click={() => confirmStartCount()}>
+      <Fa icon={faListOl} class="me-2" />Auswertung mit VOTA starten</Button>
+  {/if}
   {#if loading}
     <Spinner />
   {:else if hasError}
@@ -147,7 +155,7 @@
   <Modal isOpen={countResults} toggle={() => (countResults = false)}>
     <ModalHeader toggle={() => (countResults = false)}>Auswertung starten</ModalHeader>
     <ModalBody>
-      Auswertung der Stimmen {results?.length ? `für ${results[0].electionName}` : ''} starten?
+      Auswertung der Stimmen {results?.length ? `für ${title}` : ''} starten?
       <FormGroup class="mt-3 ps-4">
         <Input type="checkbox" bind:checked={isTestRun} label="Auswertung ist ein Testlauf" />
       </FormGroup>
@@ -160,7 +168,7 @@
 
   <Modal isOpen={!!logToShow} toggle={() => (logToShow = undefined)} size="xl">
     <ModalHeader toggle={() => (logToShow = undefined)}
-      >Logs {results?.length ? `für ${results[0].electionName}` : ''}</ModalHeader>
+      >Logs {results?.length ? `für ${title}` : ''}</ModalHeader>
     <ModalBody>
       {#if logToShow}
         <pre>{logToShow.detailedLog}</pre>
@@ -177,7 +185,7 @@
 
   <Modal isOpen={!!statsToShow} toggle={() => (statsToShow = undefined)} size="xl">
     <ModalHeader toggle={() => (statsToShow = undefined)}
-      >Statistiken {results?.length ? `für ${results[0].electionName}` : ''}</ModalHeader>
+      >Statistiken {results?.length ? `für ${title}` : ''}</ModalHeader>
     <ModalBody>
       {#if statsToShow}
         <pre>{statsToShow.statsData.trim()}</pre>
@@ -190,17 +198,16 @@
 
   <Modal isOpen={!!protocolToShow} toggle={() => (protocolToShow = undefined)} size="xl">
     <ModalHeader toggle={() => (protocolToShow = undefined)}
-      >Protokoll {results?.length ? `für ${results[0].electionName}` : ''}</ModalHeader>
+      >Protokoll {results?.length ? `für ${title}` : ''}</ModalHeader>
     <ModalBody>
       {#if protocolToShow}
-        <VotingProtocol protocol={protocolToShow.protocol} indentation={0}>
-        </VotingProtocol>
+        <VotingProtocol protocol={protocolToShow.protocol} indentation={0} />
       {/if}
     </ModalBody>
     <ModalFooter>
       <Button color="primary" on:click={() => (protocolToShow = undefined)}>OK</Button>
     </ModalFooter>
-  </Modal>  
+  </Modal>
 </template>
 
 <style>

@@ -37,13 +37,14 @@ export class BallotApi {
         return responseData;
     }
 
-    public async deleteBallot(ballotId: number, reason: string): Promise<void> {
+    public async deleteBallot(ballotId: number, electionId: number, reason: string): Promise<void> {
         const baseUrl = getBaseUrl();
         const response = await fetch(`${baseUrl}/v1/ballots/deleteRequests`, {
             method: 'POST',
             headers: getAuthHeader(),
             body: JSON.stringify({
                 ballotId,
+                electionId,
                 deleteReason: reason,
             }),
         });

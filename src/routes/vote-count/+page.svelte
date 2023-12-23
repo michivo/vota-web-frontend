@@ -321,8 +321,13 @@
       {/each}
     </div>
   {/if}
-  <Button color="secondary" size="lg" class="w-100" on:click={showConfirmationModal}
+  <Button color="primary" size="lg" class="w-75" on:click={showConfirmationModal}
     >Stimmzettel erfassen</Button>
+
+  <div class="float-end w-25 ps-3">
+    <a class="btn btn-secondary btn-lg w-100 mb-2" href="/dashboard">Erfassung abschließen</a><br>
+    <small>Die Erfassung kann später fortgesetzt werden, solange die Auszählung nicht von der Wahlleitung beendet wurde</small>
+  </div>
   <Modal isOpen={showConfirmation} toggle={cancel}>
     <ModalHeader toggle={cancel}>Stimme überprüfen</ModalHeader>
     <ModalBody>

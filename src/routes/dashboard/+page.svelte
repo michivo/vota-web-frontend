@@ -186,8 +186,8 @@
       var zip = new JSZip();
 
       for (const election of electionsToArchive) {
-        const results = await electionApi.getResults(election.id);
-        const validResults = results
+        const votingResults = await electionApi.getResults(election.id);
+        const validResults = votingResults.results
           .filter((r) => r.success && !r.isTestRun)
           .sort((a, b) => b.id - a.id);
         if (validResults.length > 0) {

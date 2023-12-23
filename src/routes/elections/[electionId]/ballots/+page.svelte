@@ -84,10 +84,11 @@
   async function deleteBallot() {
     if (ballotToDelete) {
       const ballotId = ballotToDelete.id;
+      const electionId = ballotToDelete.electionId;
       ballotToDelete = undefined;
       loading = true;
       try {
-        await ballotApi.deleteBallot(ballotId, deleteReason);
+        await ballotApi.deleteBallot(ballotId, electionId, deleteReason);
       } finally {
         loading = false;
         await refresh();
@@ -148,7 +149,7 @@
                 class="btn btn-sm btn-flat btn-outline-primary"
                 title="Details ansehen"
                 on:click={() => showBallotDetails(ballot)}><Fa icon={faEye} /></button>
-              {#if !ballot.isDeleted}
+              {#if !ballot.isDeleted && ballot.canDelete}
                 <button
                   type="button"
                   class="btn btn-sm btn-flat btn-outline-danger"
