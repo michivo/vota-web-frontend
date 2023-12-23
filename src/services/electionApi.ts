@@ -1,5 +1,5 @@
 import type { ElectionDto, ElectionWithCandidatesDto } from "../types/api/electionDto";
-import type { VotingResultDto, VotingResultsDto } from "../types/api/votingResultsDto";
+import type { VotingResultsDto } from "../types/api/votingResultsDto";
 import { getBaseUrl } from "./settingsProvider";
 import { getAuthHeader } from "./utils";
 

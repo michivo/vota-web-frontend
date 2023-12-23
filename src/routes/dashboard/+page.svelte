@@ -175,7 +175,7 @@
   function showModalForArchiving() {
     showArchiveModal = true;
     electionsToArchive = elections
-      .filter((e) => e.electionState === ElectionState.CountingComplete)
+      .filter((e) => e.electionState === ElectionState.CountingComplete || (showArchived && e.electionState === ElectionState.Done))
       .map((e) => ({ ...e, selected: false }));
   }
 
