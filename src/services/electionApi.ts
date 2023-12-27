@@ -1,3 +1,4 @@
+import { buildApiError } from "../types/api/apiError";
 import type { ElectionDto, ElectionWithCandidatesDto } from "../types/api/electionDto";
 import type { VotingResultsDto } from "../types/api/votingResultsDto";
 import { getBaseUrl } from "./settingsProvider";
@@ -56,13 +57,18 @@ export class ElectionApi {
         });
     }
 
-    public async countVotes(electionId: number, isTestRun: boolean) {
+    public async countVotes(electionId: number, isTestRun: boolean, overrideReason: string | undefined) {
         const baseUrl = getBaseUrl();
-        await fetch(`${baseUrl}/v1/elections/${electionId}/countRequests`, {
+        const response = await fetch(`${baseUrl}/v1/elections/${electionId}/countRequests`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify({ isTestRun }),
+            body: JSON.stringify({ isTestRun, overrideReason }),
         });
+
+        if(!response.ok) {
+            const error = await buildApiError(response, 'beim Auszählen der Stimmen.');
+            throw error;
+        }
     }
 
     public async getResults(electionId: number) : Promise<VotingResultsDto> {
@@ -75,6 +81,9 @@ export class ElectionApi {
         const responseData = (await response.json()) as VotingResultsDto;
         for(const resultEntry of responseData.results) {
             resultEntry.dateCreatedUtc = new Date(resultEntry.dateCreatedUtc);
+            if(resultEntry.overrideDateUtc) {
+                resultEntry.overrideDateUtc = new Date(resultEntry.overrideDateUtc);
+            }
         }
         return responseData as VotingResultsDto;
     }

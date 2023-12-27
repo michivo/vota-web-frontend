@@ -26,6 +26,7 @@
   import EditCandidatesModal from '../../components/editCandidatesModal.svelte';
   import { saveAs } from 'file-saver';
   import JSZip from 'jszip';
+    import { VotingResultStatus } from '../../types/api/votingResultsDto';
 
   let loading = false;
   let elections = [] as ElectionDto[];
@@ -191,7 +192,7 @@
         }
         const votingResults = await electionApi.getResults(election.id);
         const validResults = votingResults.results
-          .filter((r) => r.success && !r.isTestRun)
+          .filter((r) => r.success && r.resultStatus === VotingResultStatus.Valid)
           .sort((a, b) => b.id - a.id);
         if (validResults.length > 0) {
           const lastValidResult = validResults[0];

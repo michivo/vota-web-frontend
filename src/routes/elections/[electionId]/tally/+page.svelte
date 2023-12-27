@@ -1,7 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { ElectionApi } from '../../../../services/electionApi';
-  import type { VotingResultDto, VotingResultsDto } from '../../../../types/api/votingResultsDto';
+  import {
+    VotingResultStatus,
+    type VotingResultDto,
+    type VotingResultsDto
+  } from '../../../../types/api/votingResultsDto';
   import {
     Button,
     FormGroup,
@@ -10,6 +14,7 @@
     ModalBody,
     ModalFooter,
     ModalHeader,
+    Popover,
     Spinner,
     Table
   } from 'sveltestrap';
@@ -17,6 +22,7 @@
     faChartBar,
     faDownload,
     faFileCsv,
+    faInfoCircle,
     faListOl,
     faSquarePollVertical
   } from '@fortawesome/free-solid-svg-icons';
@@ -30,6 +36,7 @@
   const electionApi = new ElectionApi();
   let results = [] as VotingResultDto[];
   let title = '';
+  let overrideReason = undefined as string | undefined;
   let state = ElectionState.None;
   let loading = false;
   let hasError = false;
@@ -38,6 +45,14 @@
   let logToShow = undefined as VotingResultDto | undefined;
   let statsToShow = undefined as VotingResultDto | undefined;
   let protocolToShow = undefined as VotingResultDto | undefined;
+  let countError = '';
+  let hasCountError = false;
+
+  $: voteCountDisabled = !(
+    isTestRun ||
+    !results.find((v) => v.resultStatus === VotingResultStatus.Valid) ||
+    !!overrideReason
+  );
 
   onMount(refresh);
 
@@ -63,9 +78,15 @@
 
   async function countVotes() {
     countResults = false;
+    countError = '';
+    hasCountError = false;
     try {
       loading = true;
-      await electionApi.countVotes(data.electionId, isTestRun);
+      await electionApi.countVotes(data.electionId, isTestRun, overrideReason);
+    } catch (error: any) {
+      console.error(error);
+      hasCountError = true;
+      countError = error?.message ?? 'Unerwarteter Fehler beim Auszählen';
     } finally {
       loading = false;
       await refresh();
@@ -83,6 +104,22 @@
   function showStats(result: VotingResultDto): void {
     statsToShow = result;
   }
+
+  function getStatus(result: VotingResultDto): string {
+    if (result.success === false) {
+      return 'Fehler bei der Auswertung';
+    }
+    switch (result.resultStatus) {
+      case VotingResultStatus.Valid:
+        return 'Gültige Auswertung';
+      case VotingResultStatus.TestRun:
+        return 'Testlauf';
+      case VotingResultStatus.Overridden:
+        return 'Überschrieben';
+      default:
+        return 'Unbekannt';
+    }
+  }
 </script>
 
 <template>
@@ -96,6 +133,9 @@
   {:else if hasError}
     Fehler beim Laden der Wahlzettel.
   {:else}
+    {#if hasCountError} 
+      <p class="text-danger">{countError}</p>
+    {/if}
     <Table>
       <thead>
         <tr>
@@ -108,15 +148,24 @@
       </thead>
       <tbody>
         {#each results as result}
-          <tr class={result.isTestRun ? 'test' : 'valid'}>
+          <tr class={result.resultStatus === VotingResultStatus.Valid ? 'valid' : 'test'}>
             <td>{result.id}</td>
             <td>{result.dateCreatedUtc.toLocaleString()}</td>
-            <td
-              >{result.success === false
-                ? 'Fehler bei der Auswertung'
-                : result.isTestRun
-                ? 'Testlauf'
-                : 'Gültige Auswertung'}</td>
+            <td>{getStatus(result)}
+              {#if result.resultStatus === VotingResultStatus.Overridden}
+                <Button color="primary" size="sm" class="p-0" style="line-height: 1rem" id={`buttonResultDetails${result.id}`}>
+                  <Fa icon={faInfoCircle} />
+                </Button>
+                <Popover
+                target={`buttonResultDetails${result.id}`}
+                placement="right"
+                title="Überschrieben"
+                trigger="focus"
+              >
+                Diese Wahl von {result.overrideUser} am {result.overrideDateUtc.toLocaleString()} mit folgender Begründung überschrieben: {result.overrideReason ?? '-'}
+              </Popover>
+              {/if}
+            </td>
             <td>
               <div class="buttons">
                 <Button size="sm" color="secondary" on:click={() => showResults(result)}>
@@ -159,9 +208,19 @@
       <FormGroup class="mt-3 ps-4">
         <Input type="checkbox" bind:checked={isTestRun} label="Auswertung ist ein Testlauf" />
       </FormGroup>
+      {#if results.find((r) => r.resultStatus === VotingResultStatus.Valid) && !isTestRun}
+        <p>
+          Die Stimmen wurden bereits einmal ausgezählt. Im Falle einer erneuten Auszählung muss ein
+          Grund angegeben werden:
+        </p>
+        <FormGroup class="mt-3 ps-4">
+          <label for="recountReason">Grund für die Neuauszählung</label>
+          <Input id="recountReason" type="text" bind:value={overrideReason} />
+        </FormGroup>
+      {/if}
     </ModalBody>
     <ModalFooter>
-      <Button color="primary" on:click={countVotes}>Ja</Button>
+      <Button color="primary" on:click={countVotes} bind:disabled={voteCountDisabled}>Ja</Button>
       <Button color="secondary" on:click={() => (countResults = false)}>Abbrechen</Button>
     </ModalFooter>
   </Modal>

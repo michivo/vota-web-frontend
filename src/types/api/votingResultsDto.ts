@@ -6,11 +6,17 @@ export interface VotingResultsDto {
     results: VotingResultDto[],
 }
 
+export enum VotingResultStatus {
+    Valid = 0,
+    TestRun = 1,
+    Overridden = 2,
+}
+
 export interface VotingResultDto {
     id: number,
     electionId: number,
     userId: number,
-    isTestRun: boolean,
+    resultStatus: VotingResultStatus,
     dateCreatedUtc: Date,
     success: boolean,
     errorLog: string,
@@ -21,6 +27,9 @@ export interface VotingResultDto {
     votesCsv: string,
     statsData: string,
     username: string,
+    overrideReason: string | undefined,
+    overrideUser: string | undefined,
+    overrideDateUtc: Date,
 }
 
 export interface VotaProtocol {
