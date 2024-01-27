@@ -165,9 +165,9 @@
   <Modal isOpen={!!ballotToDelete} toggle={() => (ballotToDelete = undefined)}>
     <ModalHeader toggle={() => (ballotToDelete = undefined)}>Wahlzettel löschen</ModalHeader>
     <ModalBody>
-      Bist du sicher, dass du Wahlzettel <em
+      Sind Sie sicher, dass Sie Wahlzettel <em
         >{ballotToDelete?.ballotIdentifier ?? ballotToDelete?.id}</em>
-      löschen willst?
+      löschen wollen?
       <FormGroup class="mt-3">
         <Label for="title">Begründung (verpflichtend)</Label>
         <Input

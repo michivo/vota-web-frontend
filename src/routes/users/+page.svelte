@@ -224,7 +224,7 @@
   <Modal isOpen={!!userToDelete} toggle={() => (userToDelete = undefined)}>
     <ModalHeader toggle={() => (userToDelete = undefined)}>Benutzer löschen</ModalHeader>
     <ModalBody>
-      Bist du sicher, dass du Benutzer*in <em>{userToDelete?.username}</em> löschen willst?
+      Sind Sie sicher, dass Sie  Benutzer*in <em>{userToDelete?.username}</em> löschen wollen?
     </ModalBody>
     <ModalFooter>
       <Button color="primary" on:click={deleteUser}>Ja</Button>

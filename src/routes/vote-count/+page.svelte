@@ -36,6 +36,7 @@
   import type { User } from '../../types/userState';
   import { BallotApi } from '../../services/ballotApi';
   import type { ApiError } from '../../types/api/apiError';
+    import { goto } from '$app/navigation';
 
   const flipDurationMs = 200;
   const localStorageKey = 'vote-count-settings';
@@ -50,6 +51,7 @@
   let errorMessage = '';
   let stationSettingsOpen = true;
   let ballotValid = true;
+  let confirmClose = false;  
 
   const unsubscribeUser = userStore.subscribe(
     (val) => (currentUser = val.isLoggedIn ? val.user : undefined)
@@ -259,6 +261,15 @@
     }
     return `Zählstelle ${trimmedStation} mit ${currentUserName}, ${additionalPeople}`;
   }
+
+  function closeCounting() {
+    if(board[1].items.length) {
+      confirmClose = true;
+    }
+    else {
+      goto('/dashboard');
+    }
+  }
 </script>
 
 <div>
@@ -317,7 +328,7 @@
       </FormGroup>
     </div>
     <div class="col-4 pt-2">
-      <a class="btn btn-secondary btn-lg mt-4 w-100" href="/dashboard">Erfassung abschließen</a>
+      <Button color="secondary" class="mt-4 w-100" on:click="{closeCounting}">Erfassung abschließen</Button>
       <div>
         <small>Die Erfassung kann später fortgesetzt werden, solange die Auszählung nicht von der
           Wahlleitung beendet wurde</small>
@@ -405,6 +416,17 @@
       <Button color="secondary" on:click={cancel}>Abbrechen</Button>
     </ModalFooter>
   </Modal>
+
+  <Modal isOpen={!!confirmClose} toggle={() => confirmClose = false}>
+    <ModalHeader toggle={() => confirmClose = false}>Erfassung abschließen?</ModalHeader>
+    <ModalBody>
+      Der aktuelle Stimmzettel wurde noch nicht erfasst. Sind Sie sicher, dass Sie die Erfassung abschließen wollen?
+    </ModalBody>
+    <ModalFooter>
+      <Button color="primary" on:click={() => (confirmClose = false)}>Nein</Button>
+      <Button color="danger" on:click={() => goto('/dashboard')}>Ja</Button>
+    </ModalFooter>
+  </Modal>  
 
   <Modal isOpen={!!errorMessage} toggle={() => (errorMessage = '')}>
     <ModalHeader toggle={() => (errorMessage = '')}>Fehler beim Erfassen der Stimme</ModalHeader>
