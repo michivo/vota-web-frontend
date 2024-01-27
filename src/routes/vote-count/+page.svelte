@@ -173,13 +173,15 @@
           candidateId: c.id,
           candidateName: c.name,
           ballotOrder: index + 1,
-          order: index + 1,
+          order: index + 1
         }))
       };
       const ballotApi = new BallotApi();
       await ballotApi.addBallot(ballot);
       if (fullIdentifier) {
-        infoMessage = `Wahlzettel mit Nummer ${ballotStationName ? ballotStationName + '-' : ''}${ballotIdentifier} wurde erfolgreich erfasst`;
+        infoMessage = `Wahlzettel mit Nummer ${
+          ballotStationName ? ballotStationName + '-' : ''
+        }${ballotIdentifier} wurde erfolgreich erfasst`;
       } else {
         infoMessage = 'Wahlzettel wurde erfolgreich erfasst';
       }
@@ -259,26 +261,40 @@
       </Row>
     </AccordionItem>
   </Accordion>
-  <FormGroup class="mt-2 mx-3">
-    <label for="ballotIdentifier" class="form-label mt-2">Stimmzettel-Nummer</label>
-    <InputGroup>
-      {#if ballotStationName}
-        <InputGroupText>{ballotStationName}-</InputGroupText>
-      {/if}
-      <input
-        type="text"
-        class="form-control form-control-lg"
-        bind:value={ballotIdentifier}
-        id="ballotIdentifier" />
-    </InputGroup>
-  </FormGroup>  
-  <FormGroup class="mt-3 ps-4">
-    <Input type="checkbox" bind:checked={ballotValid} label="Stimmzettel ist gültig" />
-  </FormGroup>
+
+  <div class="row mt-2 mx-3">
+    <div class="col-8">
+      <FormGroup>
+        <label for="ballotIdentifier" class="form-label">Stimmzettel-Nummer</label>
+        <InputGroup>
+          {#if ballotStationName}
+            <InputGroupText>{ballotStationName}-</InputGroupText>
+          {/if}
+          <input
+            type="text"
+            class="form-control form-control-lg"
+            bind:value={ballotIdentifier}
+            id="ballotIdentifier" />
+        </InputGroup>
+      </FormGroup>
+      <FormGroup class="mt-3 ps-4">
+        <Input type="checkbox" bind:checked={ballotValid} label="Stimmzettel ist gültig" />
+      </FormGroup>
+    </div>
+    <div class="col-4 pt-2">
+      <a class="btn btn-secondary btn-lg mt-4 w-100" href="/dashboard">Erfassung abschließen</a>
+      <div>
+        <small>Die Erfassung kann später fortgesetzt werden, solange die Auszählung nicht von der
+          Wahlleitung beendet wurde</small>
+      </div>
+    </div>
+  </div>
   {#if ballotValid}
     <div class="selection-panel">
       {#each board as column (column.id)}
-        <div class={`candidates pb-3 candidates-${column.name}`} animate:flip={{ duration: flipDurationMs }}>
+        <div
+          class={`candidates pb-3 candidates-${column.name}`}
+          animate:flip={{ duration: flipDurationMs }}>
           <h2>{column.title}</h2>
           <div
             class="column-content h-100"
@@ -321,13 +337,8 @@
       {/each}
     </div>
   {/if}
-  <Button color="primary" size="lg" class="w-75" on:click={showConfirmationModal}
+  <Button color="primary" size="lg" class="w-100" on:click={showConfirmationModal}
     >Stimmzettel erfassen</Button>
-
-  <div class="float-end w-25 ps-3">
-    <a class="btn btn-secondary btn-lg w-100 mb-2" href="/dashboard">Erfassung abschließen</a><br>
-    <small>Die Erfassung kann später fortgesetzt werden, solange die Auszählung nicht von der Wahlleitung beendet wurde</small>
-  </div>
   <Modal isOpen={showConfirmation} toggle={cancel}>
     <ModalHeader toggle={cancel}>Stimme überprüfen</ModalHeader>
     <ModalBody>
@@ -415,7 +426,7 @@
   .candidates-selection {
     border: 2px solid var(--bs-secondary);
     border-radius: 0.5rem;
-  }  
+  }
 
   .candidate {
     margin: 0.25rem;
