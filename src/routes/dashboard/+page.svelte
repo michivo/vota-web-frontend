@@ -26,7 +26,7 @@
   import EditCandidatesModal from '../../components/editCandidatesModal.svelte';
   import { saveAs } from 'file-saver';
   import JSZip from 'jszip';
-    import { VotingResultStatus } from '../../types/api/votingResultsDto';
+  import { VotingResultStatus } from '../../types/api/votingResultsDto';
 
   let loading = false;
   let elections = [] as ElectionDto[];
@@ -42,6 +42,7 @@
   let archiveError = '';
   let archiving = false;
   let showArchived = false;
+  let isReadOnly = false;
 
   const electionApi = new ElectionApi();
 
@@ -73,6 +74,7 @@
 
   function createNewElection() {
     isNewElection = true;
+    isReadOnly = false;
     electionToEdit = {
       title: '',
       enforceGenderParity: true,
@@ -90,6 +92,13 @@
 
   function editElection(election: ElectionDto) {
     isNewElection = false;
+    isReadOnly = false;
+    electionToEdit = election;
+  }
+
+  function viewSettings(election: ElectionDto) {
+    isNewElection = false;
+    isReadOnly = true;
     electionToEdit = election;
   }
 
@@ -176,7 +185,11 @@
   function showModalForArchiving() {
     showArchiveModal = true;
     electionsToArchive = elections
-      .filter((e) => e.electionState === ElectionState.CountingComplete || (showArchived && e.electionState === ElectionState.Done))
+      .filter(
+        (e) =>
+          e.electionState === ElectionState.CountingComplete ||
+          (showArchived && e.electionState === ElectionState.Done)
+      )
       .map((e) => ({ ...e, selected: false }));
   }
 
@@ -273,6 +286,8 @@
           <a class="button btn btn-sm btn-primary" href={`/vote-count?electionId=${election.id}`}>
             <Fa icon={faListOl} class="me-2" />Stimmen Erfassen</a>
           {#if currentUser?.role === UserRole.Admin}
+            <Button size="sm" color="primary" on:click={() => viewSettings(election)}>
+              <Fa icon={faGear} class="me-2" />Einstellungen</Button>
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
             <Button
@@ -283,6 +298,8 @@
           {/if}
         {:else if election.electionState === ElectionState.CountingComplete}
           {#if currentUser?.role === UserRole.Admin}
+            <Button size="sm" color="primary" on:click={() => viewSettings(election)}>
+              <Fa icon={faGear} class="me-2" />Einstellungen</Button>
             <a class="button btn btn-sm btn-primary" href={`/vote-count?electionId=${election.id}`}>
               <Fa icon={faListOl} class="me-2" />Stimmen Nachtragen</a>
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
@@ -292,6 +309,8 @@
           {/if}
         {:else if election.electionState === ElectionState.Done}
           {#if currentUser?.role === UserRole.Admin}
+            <Button size="sm" color="primary" on:click={() => viewSettings(election)}>
+              <Fa icon={faGear} class="me-2" />Einstellungen</Button>
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/tally`}>
@@ -310,6 +329,7 @@
   <EditElectionModal
     election={electionToEdit}
     {isNewElection}
+    {isReadOnly}
     on:cancel={() => (electionToEdit = undefined)}
     on:save={saveElection} />
   <EditCandidatesModal
