@@ -11,7 +11,6 @@
     Input,
     InputGroup,
     InputGroupText,
-    Label,
     Modal,
     ModalBody,
     ModalFooter,
@@ -37,9 +36,9 @@
   import type { User } from '../../types/userState';
   import { BallotApi } from '../../services/ballotApi';
   import type { ApiError } from '../../types/api/apiError';
-  import { validate_each_argument } from 'svelte/internal';
 
   const flipDurationMs = 200;
+  const localStorageKey = 'vote-count-settings';
 
   let showConfirmation = false;
   let ballotStationName = '';
@@ -62,11 +61,45 @@
     if (browser) {
       const urlParams = new URLSearchParams(window.location.search);
       electionId = parseInt(urlParams.get('electionId') ?? '0');
+      tryLoadPreviousSettings();
       if (electionId) {
         await loadCandidates(electionId);
       }
     }
   });
+
+  function tryLoadPreviousSettings() {
+    const previousSettings = localStorage.getItem(localStorageKey);
+    if(previousSettings) {
+      try {
+        const settings: { electionId: number, ballotIdentifier: string, ballotStationName: string, additionalPeople: string } = 
+          JSON.parse(previousSettings);
+        if(settings.electionId === electionId) {
+          ballotIdentifier = settings.ballotIdentifier;
+          ballotStationName = settings.ballotStationName;
+          additionalPeople = settings.additionalPeople;
+        }
+        else {
+          localStorage.removeItem(localStorageKey);
+        }
+      }
+      catch(err) {
+        console.error('Error loading previous settings');
+        console.error(err);
+        localStorage.removeItem(localStorageKey);
+      }
+    }
+  }
+
+  function updateStoredSettings() {
+    const settings = {
+      electionId,
+      ballotStationName,
+      ballotIdentifier,
+      additionalPeople
+    };
+    localStorage.setItem(localStorageKey, JSON.stringify(settings));
+  }
 
   let board: CandidateList[] = [
     {
@@ -174,7 +207,8 @@
           candidateName: c.name,
           ballotOrder: index + 1,
           order: index + 1
-        }))
+        })),
+        canDelete: true,
       };
       const ballotApi = new BallotApi();
       await ballotApi.addBallot(ballot);
@@ -188,6 +222,7 @@
       board[0].items = [...originalList];
       board[1].items = [];
       ballotIdentifier = getNextIdentifier();
+      updateStoredSettings();
       ballotValid = true;
     } catch (error: unknown) {
       const apiError = error as ApiError;
