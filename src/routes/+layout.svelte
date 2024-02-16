@@ -5,7 +5,10 @@
   import { userStore } from '../stores/userStore';
   import { UserRole, type UserState } from '../types/userState';
   import Fa from 'svelte-fa';
-  import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+  import {
+    faCircleInfo,
+    faRightFromBracket
+  } from '@fortawesome/free-solid-svg-icons';
   import { UserService } from '../services/userService';
   import { page } from '$app/stores';
 
@@ -17,7 +20,7 @@
   $: homeLink = userState?.isLoggedIn ? '/dashboard' : '/';
 
   if (browser) {
-    isAnonymousRoute = !!anonymousRoutes.find(r => window.location.pathname.startsWith(r));
+    isAnonymousRoute = !!anonymousRoutes.find((r) => window.location.pathname.startsWith(r));
 
     userStore.subscribe((state) => {
       userState = state;
@@ -31,8 +34,7 @@
 <nav class="navbar bg-light navbar-expand-lg">
   <div class="container-fluid">
     <a class="navbar-brand me-4" href={homeLink}
-      ><img src="/faviconxl.png" height="192" width="192" alt="" class="logo me-3" />VOTA Web</a
-    >
+      ><img src="/faviconxl.png" height="192" width="192" alt="" class="logo me-3" />VOTA Web</a>
     {#if userState?.isLoggedIn && !isAnonymousRoute}
       <button
         class="navbar-toggler"
@@ -41,8 +43,7 @@
         data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent"
         aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
+        aria-label="Toggle navigation">
         <span class="navbar-toggler-icon" />
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -51,26 +52,30 @@
             <a
               class="nav-link"
               href="/dashboard"
-              class:active={$page.url.pathname.includes('/dashboard')}>Wahlen</a
-            >
+              class:active={$page.url.pathname.includes('/dashboard')}>Wahlen</a>
           </li>
           {#if userState?.user?.role === UserRole.Admin}
             <li class="nav-item">
               <a class="nav-link" href="/users" class:active={$page.url.pathname.includes('/user')}
-                >Benutzer*innenverwaltung</a
-              >
+                >Benutzer*innenverwaltung</a>
             </li>
           {/if}
         </ul>
         <div class="user-info">
-          <small>
+          <span class="help mx-2">
+            <a href="/help">
+              <small>
+                <Fa icon={faCircleInfo} /> Hilfe
+              </small>
+            </a>
+          </span>|
+          <small class="ms-2">
             Angemeldet als {userState?.user?.displayName ??
               userState.user?.email ??
               userState?.user?.name}
           </small>
           <Button color="link" on:click={() => userService.signOut()} title="Abmelden"
-            ><Fa icon={faRightFromBracket} /></Button
-          >
+            ><Fa icon={faRightFromBracket} /></Button>
         </div>
       </div>
     {/if}
