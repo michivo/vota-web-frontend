@@ -13,6 +13,8 @@
 
   export let election = undefined as ElectionDto | undefined;
   export let showModal = false;
+  export let isReadOnly = false;
+
   let errorMessage = '';
   let loading = false;
   let candidates = [] as CandidateDto[];
@@ -96,13 +98,15 @@
   <Modal isOpen={showModal} toggle={onCancel} size="lg" on:open={loadCandidates}>
     <ModalHeader toggle={onCancel}>Kandidat*innen</ModalHeader>
     <ModalBody>
-      <Table size="sm">
+      <Table size="sm" striped>
         <thead>
           <tr>
             <th class="order-col">#</th>
             <th>Name</th>
             <th class="gender-col">Geschlecht</th>
-            <th class="actions-col">Aktionen</th>
+            {#if !isReadOnly}
+              <th class="actions-col">Aktionen</th>
+            {/if}
           </tr>
         </thead>
         <tbody>
@@ -110,45 +114,62 @@
             <tr>
               <td class="order-col"
                 >{candidate.ballotOrder}
-                <Button
-                  class="ms-2 py-0 px-1"
-                  size="sm"
-                  color={candidateIndex === 0 ? 'light' : 'primary'}
-                  disabled={candidateIndex === 0}
-                  on:click={() => moveUp(candidateIndex)}>
-                  <Fa icon={faAngleUp} />
-                </Button>
-                <Button
-                  class="py-0 px-1"
-                  size="sm"
-                  color={candidateIndex === candidates.length - 1 ? 'light' : 'primary'}
-                  disabled={candidateIndex === candidates.length - 1}
-                  on:click={() => moveDown(candidateIndex)}>
-                  <Fa icon={faAngleDown} />
-                </Button>
+                {#if !isReadOnly}
+                  <Button
+                    class="ms-2 py-0 px-1"
+                    size="sm"
+                    color={candidateIndex === 0 ? 'light' : 'primary'}
+                    disabled={candidateIndex === 0}
+                    on:click={() => moveUp(candidateIndex)}>
+                    <Fa icon={faAngleUp} />
+                  </Button>
+                  <Button
+                    class="py-0 px-1"
+                    size="sm"
+                    color={candidateIndex === candidates.length - 1 ? 'light' : 'primary'}
+                    disabled={candidateIndex === candidates.length - 1}
+                    on:click={() => moveDown(candidateIndex)}>
+                    <Fa icon={faAngleDown} />
+                  </Button>
+                {/if}
               </td>
-              <td><input type="text" class="w-100 form-control" bind:value={candidate.name} /></td>
+              <td>
+                {#if isReadOnly}
+                  {candidate.name}
+                {:else}
+                  <input type="text" class="w-100" bind:value={candidate.name} />
+                {/if}
+              </td>
               <td class="gender-col">
-                <select class="form-select" id="roleSelect" bind:value={candidate.gender}>
-                  <option value={Gender.Female}>Weiblich</option>
-                  <option value={Gender.Male}>Männlich</option>
-                </select></td>
-              <td class="actions-col">
-                <Button color="danger" size="sm" on:click={() => removeCandidate(candidateIndex)}
-                  ><Fa icon={faCircleMinus} /></Button>
+                {#if isReadOnly}
+                  {candidate.gender === Gender.Male ? 'Männlich' : 'Weiblich'}
+                {:else}
+                  <select class="form-select" id="roleSelect" bind:value={candidate.gender}>
+                    <option value={Gender.Female}>Weiblich</option>
+                    <option value={Gender.Male}>Männlich</option>
+                  </select>
+                {/if}
               </td>
+              {#if !isReadOnly}
+                <td class="actions-col">
+                  <Button color="danger" size="sm" on:click={() => removeCandidate(candidateIndex)}
+                    ><Fa icon={faCircleMinus} /></Button>
+                </td>
+              {/if}
             </tr>
           {/each}
-          <tr>
-            <td class="order-col" />
-            <td />
-            <td class="gender-col" />
-            <td class="actions-col">
-              <Button color="success" size="sm" on:click={addCandidate}>
-                <Fa icon={faCirclePlus} />
-              </Button>
-            </td>
-          </tr>
+          {#if !isReadOnly}
+            <tr>
+              <td class="order-col" />
+              <td />
+              <td class="gender-col" />
+              <td class="actions-col">
+                <Button color="success" size="sm" on:click={addCandidate}>
+                  <Fa icon={faCirclePlus} />
+                </Button>
+              </td>
+            </tr>
+          {/if}
         </tbody>
       </Table>
       {#if errorToShow}
@@ -156,8 +177,12 @@
       {/if}
     </ModalBody>
     <ModalFooter>
-      <Button type="submit" color="primary" on:click={onSave}>Speichern</Button>
-      <Button color="secondary" on:click={onCancel}>Abbrechen</Button>
+      {#if isReadOnly}
+        <Button color="secondary" on:click={onCancel}>Schließen</Button>
+      {:else}
+        <Button type="submit" color="primary" on:click={onSave}>Speichern</Button>
+        <Button color="secondary" on:click={onCancel}>Abbrechen</Button>
+      {/if}
     </ModalFooter>
   </Modal>
 </div>

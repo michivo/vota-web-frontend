@@ -124,7 +124,7 @@
 
 <template>
   <h1 class="my-3">Ergebnisse {title ? `- ${title}` : ''}</h1>
-  {#if !loading && state === ElectionState.CountingComplete}
+  {#if !loading && (state === ElectionState.CountingComplete || state === ElectionState.ResultsOfficial)}
     <Button color="secondary" on:click={() => confirmStartCount()}>
       <Fa icon={faListOl} class="me-2" />Auswertung mit VOTA starten</Button>
   {/if}

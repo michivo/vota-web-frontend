@@ -122,6 +122,13 @@
 
   function editCandidates(election: ElectionDto): void {
     electionToEditCandidates = election;
+    isReadOnly = false;
+    showCandidatesModal = true;
+  }
+
+  function viewCandidates(election: ElectionDto): void {
+    electionToEditCandidates = election;
+    isReadOnly = true;
     showCandidatesModal = true;
   }
 
@@ -132,7 +139,9 @@
       case ElectionState.Counting:
         return 'Auszählung läuft';
       case ElectionState.CountingComplete:
-        return 'Auszählung abgeschlossen';
+        return 'Erfassung abgeschlossen';
+      case ElectionState.ResultsOfficial:
+        return 'Ergebnis liegt vor';
       case ElectionState.Done:
         return 'Abgeschlossen';
       default:
@@ -188,6 +197,7 @@
       .filter(
         (e) =>
           e.electionState === ElectionState.CountingComplete ||
+          e.electionState === ElectionState.ResultsOfficial ||
           (showArchived && e.electionState === ElectionState.Done)
       )
       .map((e) => ({ ...e, selected: false }));
@@ -288,6 +298,8 @@
           {#if currentUser?.role === UserRole.Admin}
             <Button size="sm" color="primary" on:click={() => viewSettings(election)}>
               <Fa icon={faGear} class="me-2" />Einstellungen</Button>
+            <Button size="sm" color="primary" on:click={() => editCandidates(election)}>
+              <Fa icon={faUsersGear} class="me-2" />Kandidat*innen</Button>
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
             <Button
@@ -296,10 +308,12 @@
               on:click={() => confirmUpdateElectionState(election, ElectionState.CountingComplete)}>
               <Fa icon={faCheckCircle} class="me-2" />Auswerten</Button>
           {/if}
-        {:else if election.electionState === ElectionState.CountingComplete}
+        {:else if election.electionState === ElectionState.CountingComplete || election.electionState === ElectionState.ResultsOfficial}
           {#if currentUser?.role === UserRole.Admin}
             <Button size="sm" color="primary" on:click={() => viewSettings(election)}>
               <Fa icon={faGear} class="me-2" />Einstellungen</Button>
+            <Button size="sm" color="primary" on:click={() => viewCandidates(election)}>
+              <Fa icon={faUsersGear} class="me-2" />Kandidat*innen</Button>
             <a class="button btn btn-sm btn-primary" href={`/vote-count?electionId=${election.id}`}>
               <Fa icon={faListOl} class="me-2" />Stimmen Nachtragen</a>
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
@@ -335,6 +349,7 @@
   <EditCandidatesModal
     election={electionToEditCandidates}
     showModal={showCandidatesModal}
+    {isReadOnly}
     on:save={saveCandidates}
     on:cancel={() => (showCandidatesModal = false)} />
 

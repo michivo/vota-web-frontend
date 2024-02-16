@@ -14,7 +14,6 @@
   import { ElectionType, type ElectionDto } from '../types/api/electionDto';
   import Fa from 'svelte-fa';
   import { faMars, faVenus } from '@fortawesome/free-solid-svg-icons';
-  import { validate_each_keys } from 'svelte/internal';
 
   export let election: ElectionDto | undefined;
   export let isNewElection = false;
