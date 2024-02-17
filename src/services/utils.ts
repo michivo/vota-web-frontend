@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
 import { userStore } from "../stores/userStore";
+import { ApiError } from "../types/api/apiError";
 
 function parseJwt(token: string) {
     const base64Url = token.split('.')[1];
@@ -21,9 +22,25 @@ function getAuthHeader(): Record<string, string> {
     return headers;
 }
 
-function handleResponse(response: Response) : Response {
+async function handleResponse(response: Response) : Promise<Response> {
     if(!response.ok) {
-        throw new Error('Request failed');
+        try {
+            const error = await response.json();
+            if(error.message) {
+                const errorMessage = JSON.parse(error.message);
+                const errorList = errorMessage.errors.map((e: { msg: string, path: string }) => `${e.path ? e.path + ': ' + e.msg : e.msg}`);
+                throw new ApiError(errorList.join(', '));
+            }
+            else {
+                throw new Error(error);
+            }
+        }
+        catch(err) {
+            if(err instanceof ApiError) {
+                throw err;
+            }
+            throw new Error('Unerwarteter Fehler');
+        }
     }
     return response;
 }

@@ -27,7 +27,12 @@
       if (!state.isLoggedIn && !isAnonymousRoute) {
         goto('/');
       }
+      console.error(userState);
     });
+
+    userState = $userStore;
+
+    console.error(userState);
   }
 </script>
 
@@ -70,8 +75,8 @@
             </a>
           </span>|
           <small class="ms-2">
-            Angemeldet als {userState?.user?.displayName ??
-              userState.user?.email ??
+            Angemeldet als {userState?.user?.displayName ||
+              userState.user?.email ||
               userState?.user?.name}
           </small>
           <Button color="link" on:click={() => userService.signOut()} title="Abmelden"

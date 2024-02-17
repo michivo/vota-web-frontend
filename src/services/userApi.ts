@@ -33,7 +33,7 @@ export class UserApi {
 
     public async deleteUser(user: UserDto): Promise<void> {
         const baseUrl = getBaseUrl();
-        handleResponse(await fetch(`${baseUrl}/v1/users/${user.id}`, {
+        await handleResponse(await fetch(`${baseUrl}/v1/users/${user.id}`, {
             method: 'DELETE',
             headers: getAuthHeader(),
         }));
@@ -41,7 +41,7 @@ export class UserApi {
 
     public async setPassword(id: number, password: string): Promise<void> {
         const baseUrl = getBaseUrl();
-        handleResponse(await fetch(`${baseUrl}/v1/users/${id}/password`, {
+        await handleResponse(await fetch(`${baseUrl}/v1/users/${id}/password`, {
             method: 'POST',
             headers: getAuthHeader(),
             body: JSON.stringify({ password }),
@@ -50,7 +50,7 @@ export class UserApi {
 
     public async setInitialPassword(challenge: string, password: string) {
         const baseUrl = getBaseUrl();
-        handleResponse(await fetch(`${baseUrl}/v1/users/challengeResponses`, {
+        await handleResponse(await fetch(`${baseUrl}/v1/users/challengeResponses`, {
             method: 'POST',
             headers: getAuthHeader(),
             body: JSON.stringify({ challenge, password }),
@@ -59,7 +59,7 @@ export class UserApi {
 
     public async updateUser(user: UserDto): Promise<void> {
         const baseUrl = getBaseUrl();
-        handleResponse(await fetch(`${baseUrl}/v1/users/${user.id}`, {
+        await handleResponse(await fetch(`${baseUrl}/v1/users/${user.id}`, {
             method: 'PUT',
             headers: getAuthHeader(),
             body: JSON.stringify(user),
@@ -68,7 +68,7 @@ export class UserApi {
 
     public async createUser(newUser: UserWithPasswordDto): Promise<void> {
         const baseUrl = getBaseUrl();
-        handleResponse(await fetch(`${baseUrl}/v1/users`, {
+        await handleResponse(await fetch(`${baseUrl}/v1/users`, {
             method: 'POST',
             headers: getAuthHeader(),
             body: JSON.stringify(newUser),

@@ -17,6 +17,7 @@
   import Fa from 'svelte-fa';
   import { userStore } from '../../stores/userStore';
   import EditUserModal from '../../components/editUserModal.svelte';
+  import { ApiError } from '../../types/api/apiError';
 
   let users: UserDto[] = [];
   let loading = false;
@@ -119,12 +120,16 @@
           }
         }
       }
-    } catch {
-      showError(
-        event.detail.isNewUser
-          ? 'Unerwarteter Fehler beim Erstellen'
-          : 'Unerwarteter Fehler beim Bearbeiten'
-      );
+    } catch (err: any) {
+      if (err instanceof ApiError) {
+        showError(`Fehler beim ${event.detail.isNewUser ? 'Erstellen' : 'Bearbeiten'}: ${err.message}`);
+      } else {
+        showError(
+          event.detail.isNewUser
+            ? 'Unerwarteter Fehler beim Erstellen'
+            : 'Unerwarteter Fehler beim Bearbeiten'
+        );
+      }
       userToEdit = event.detail.user;
       hasError = true;
     } finally {
@@ -224,7 +229,7 @@
   <Modal isOpen={!!userToDelete} toggle={() => (userToDelete = undefined)}>
     <ModalHeader toggle={() => (userToDelete = undefined)}>Benutzer löschen</ModalHeader>
     <ModalBody>
-      Sind Sie sicher, dass Sie  Benutzer*in <em>{userToDelete?.username}</em> löschen wollen?
+      Sind Sie sicher, dass Sie Benutzer*in <em>{userToDelete?.username}</em> löschen wollen?
     </ModalBody>
     <ModalFooter>
       <Button color="primary" on:click={deleteUser}>Ja</Button>
