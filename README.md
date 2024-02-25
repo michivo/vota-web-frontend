@@ -1,8 +1,14 @@
-# vota-web-frontend
+# Vota Web Frontend
 
 # Run Dockerized version
 
-Run
+First, you need to define the base URI for the **vota backend** in dotenv (.env) file like this:
+
+```
+PUBLIC_API_URL='http://localhost:31401/api'
+```
+
+Then, run
 
     docker build -t vota_frontend .
 
