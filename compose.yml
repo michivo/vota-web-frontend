@@ -2,9 +2,9 @@ services:
   vota-frontend:
     ports: 
       - 8083:3000
-    environment:
-      - PUBLIC_API_URL=http://localhost:31401/api
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        - PUBLIC_API_URL=http://localhost:31401/api
 

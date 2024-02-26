@@ -12,6 +12,7 @@
 		"format": "prettier --plugin-search-dir . --write .",
 		"start": "node build/index.js",
 		"docker:build": "docker build -t vota_frontend .",
+		"docker:prepare": "node ./prepareenv.js",		
 		"docker:run": "docker run -it -p 10082:3000 vota_frontend",
 		"docker:run:detached": "docker run -it -d -p 10082:3000 vota_frontend"
 	},
