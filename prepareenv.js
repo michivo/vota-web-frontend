@@ -1,6 +1,6 @@
 import { writeFileSync } from 'fs';
 
-const apiUrl = process.env.PUBLIC_API_URL;
+const apiUrl = process.env.PUBLIC_API_URL_OVERRIDE;
 
 if(apiUrl) {
     console.error(`Overriding .env, setting PUBLIC_API_URL: ${apiUrl}`);

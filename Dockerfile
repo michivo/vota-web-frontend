@@ -6,7 +6,7 @@ COPY package.json ./
 RUN npm install
 COPY . ./
 ARG PUBLIC_API_URL
-ENV PUBLIC_API_URL $PUBLIC_API_URL
+ENV PUBLIC_API_URL_OVERRIDE $PUBLIC_API_URL
 RUN npm run docker:prepare
 RUN npm run build
 

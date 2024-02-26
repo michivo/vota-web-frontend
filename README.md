@@ -18,6 +18,6 @@ to build the Docker container. Run
 
 to run the Docker container. Run
 
-    docker exec -it [container_name] /bin/bash
+    docker exec -it [container_name] /bin/sh
 
 to start a bash inside your Docker container.
