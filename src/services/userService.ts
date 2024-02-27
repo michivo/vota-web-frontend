@@ -34,6 +34,10 @@ export class UserService {
         }
     }
 
+    public async resetPassword(username: string) {
+        await this.api.resetPassword(username);
+    }    
+
     public signOut() {
         localStorage.removeItem('user');
         userStore.set({

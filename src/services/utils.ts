@@ -16,27 +16,32 @@ function getAuthHeader(): Record<string, string> {
     const user = get(userStore);
     const headers = {} as Record<string, string>;
     headers['Content-Type'] = 'application/json';
-    if(user.user) {
+    if (user.user) {
         headers['Authorization'] = `Bearer ${user.user.token}`;
     }
     return headers;
 }
 
-async function handleResponse(response: Response) : Promise<Response> {
-    if(!response.ok) {
+async function handleResponse(response: Response): Promise<Response> {
+    if (!response.ok) {
         try {
             const error = await response.json();
-            if(error.message) {
-                const errorMessage = JSON.parse(error.message);
-                const errorList = errorMessage.errors.map((e: { msg: string, path: string }) => `${e.path ? e.path + ': ' + e.msg : e.msg}`);
-                throw new ApiError(errorList.join(', '));
+            if (error.message) {
+                try {
+                    const errorMessage = JSON.parse(error.message);
+                    const errorList = errorMessage.errors.map((e: { msg: string, path: string }) => `${e.path ? e.path + ': ' + e.msg : e.msg}`);
+                    throw new ApiError(errorList.join(', '));
+                }
+                catch {
+                    throw new ApiError(error.message);
+                }
             }
             else {
                 throw new Error(error);
             }
         }
-        catch(err) {
-            if(err instanceof ApiError) {
+        catch (err) {
+            if (err instanceof ApiError) {
                 throw err;
             }
             throw new Error('Unerwarteter Fehler');

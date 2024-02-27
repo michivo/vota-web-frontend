@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import { Button } from 'sveltestrap';
   import { userStore } from '../stores/userStore';
-  import { UserRole, type UserState } from '../types/userState';
+  import { UserRole } from '../types/userState';
   import Fa from 'svelte-fa';
   import {
     faCircleInfo,
@@ -12,27 +12,16 @@
   import { UserService } from '../services/userService';
   import { page } from '$app/stores';
 
-  let userState: UserState | null = null;
-  let isAnonymousRoute = false;
   const userService = new UserService();
-  const anonymousRoutes = ['/reset-password'];
 
-  $: homeLink = userState?.isLoggedIn ? '/dashboard' : '/';
+  $: homeLink = $userStore?.isLoggedIn ? '/dashboard' : '/';
 
   if (browser) {
-    isAnonymousRoute = !!anonymousRoutes.find((r) => window.location.pathname.startsWith(r));
-
     userStore.subscribe((state) => {
-      userState = state;
-      if (!state.isLoggedIn && !isAnonymousRoute) {
+      if (!state.isLoggedIn) {
         goto('/');
       }
-      console.error(userState);
     });
-
-    userState = $userStore;
-
-    console.error(userState);
   }
 </script>
 
@@ -40,7 +29,7 @@
   <div class="container-fluid">
     <a class="navbar-brand me-4" href={homeLink}
       ><img src="/faviconxl.png" height="192" width="192" alt="" class="logo me-3" />VOTA Web</a>
-    {#if userState?.isLoggedIn && !isAnonymousRoute}
+    {#if $userStore?.isLoggedIn}
       <button
         class="navbar-toggler"
         type="button"
@@ -59,7 +48,7 @@
               href="/dashboard"
               class:active={$page.url.pathname.includes('/dashboard')}>Wahlen</a>
           </li>
-          {#if userState?.user?.role === UserRole.Admin}
+          {#if $userStore?.user?.role === UserRole.Admin}
             <li class="nav-item">
               <a class="nav-link" href="/users" class:active={$page.url.pathname.includes('/user')}
                 >Benutzer*innenverwaltung</a>
@@ -75,9 +64,9 @@
             </a>
           </span>|
           <small class="ms-2">
-            Angemeldet als {userState?.user?.displayName ||
-              userState.user?.email ||
-              userState?.user?.name}
+            Angemeldet als {$userStore?.user?.displayName ||
+              $userStore.user?.email ||
+              $userStore?.user?.name}
           </small>
           <Button color="link" on:click={() => userService.signOut()} title="Abmelden"
             ><Fa icon={faRightFromBracket} /></Button>

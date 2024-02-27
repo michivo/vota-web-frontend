@@ -1,5 +1,16 @@
 <script lang="ts">
-  import { Button, Form, FormGroup, Input, Label, Spinner } from 'sveltestrap';
+  import {
+    Button,
+    Form,
+    FormGroup,
+    Input,
+    Label,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader,
+    Spinner
+  } from 'sveltestrap';
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import { userStore } from '../stores/userStore';
@@ -8,6 +19,7 @@
   let username = '';
   let password = '';
   let status = '';
+  let resetPasswordUsername = undefined as undefined | string;
   let hasError = false;
   let loggingIn = false;
   let signedIn = false;
@@ -47,6 +59,24 @@
     }
     return 'Unerwarteter Fehler ' + activity;
   }
+
+  function showResetPasswordModal() {
+    resetPasswordUsername = username;
+  }
+
+  async function resetPassword() {
+    try {
+      await userService.resetPassword(username);
+      hasError = false;
+      status = 'E-Mail wurde verschickt.';
+    } catch (err: any) {
+      hasError = true;
+      status = getErrorMessage(err, 'beim Zurücksetzen.');
+    } finally {
+      loggingIn = false;
+      resetPasswordUsername = undefined;
+    }
+  }
 </script>
 
 <div class="container main-content">
@@ -70,6 +100,12 @@
             class:text-success={!hasError}>
             <small>{status} </small>
           </div>
+          {#if hasError && !!username}
+            <div class="reset-button-container mb-2">
+            <Button size="sm" color="secondary" outline on:click={showResetPasswordModal}
+              >Passwort vergessen?</Button>
+            </div>
+          {/if}          
         {/if}
         <div class="buttons">
           <Button
@@ -81,6 +117,24 @@
       </Form>
     {/if}
   </div>
+  <Modal
+    isOpen={!!resetPasswordUsername}
+    toggle={() => (resetPasswordUsername = undefined)}
+    size="xl">
+    <ModalHeader toggle={() => (resetPasswordUsername = undefined)}
+      >Passwort zurücksetzen</ModalHeader>
+    <ModalBody>
+      Drücken Sie Ja, um das Passwort für <b>{resetPasswordUsername}</b> zurückzusetzen. Ihnen wird ein
+      Link zugeschickt, über den Sie Ihr Passwort zurücksetzen können.
+    </ModalBody>
+    <ModalFooter>
+      <Button
+        color="secondary"
+        on:click={() => (resetPasswordUsername = undefined)}
+        bind:disabled={loggingIn}>Nein</Button>
+      <Button color="primary" on:click={resetPassword} bind:disabled={loggingIn}>Ja</Button>
+    </ModalFooter>
+  </Modal>
 </div>
 
 <style>
@@ -90,6 +144,12 @@
     width: 100svh;
     justify-content: center;
     align-items: center;
+  }
+
+  .reset-button-container {
+    display: flex;
+    justify-content: end;
+    width: 100%;
   }
 
   .login-form {

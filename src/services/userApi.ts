@@ -48,6 +48,17 @@ export class UserApi {
         }));
     }
 
+    public async resetPassword(username: string): Promise<void> {
+        const baseUrl = getBaseUrl();
+        await handleResponse(await fetch(`${baseUrl}/v1/users/resetRequests`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username }),
+        }));
+    }    
+
     public async setInitialPassword(challenge: string, password: string) {
         const baseUrl = getBaseUrl();
         await handleResponse(await fetch(`${baseUrl}/v1/users/challengeResponses`, {
