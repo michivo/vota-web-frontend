@@ -298,7 +298,7 @@
           {#if currentUser?.role === UserRole.Admin}
             <Button size="sm" color="primary" on:click={() => viewSettings(election)}>
               <Fa icon={faGear} class="me-2" />Einstellungen</Button>
-            <Button size="sm" color="primary" on:click={() => editCandidates(election)}>
+            <Button size="sm" color="primary" on:click={() => viewCandidates(election)}>
               <Fa icon={faUsersGear} class="me-2" />Kandidat*innen</Button>
             <a class="button btn btn-sm btn-primary" href={`/elections/${election.id}/ballots`}>
               <Fa icon={faClipboardCheck} class="me-2" />Kontrollieren</a>
