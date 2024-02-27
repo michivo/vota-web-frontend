@@ -20,6 +20,16 @@
     challenge = urlParams.get('challenge') ?? '';
   }
 
+  function getErrorMessage(err: any): string {
+    if (err && err.message) {
+      if(err.message.includes('challenge')) {
+        return 'Ungültiger Link, bitte öffnen Sie den Link aus Ihrer Mail erneut.';
+      }
+      return err.message;
+    }
+    return 'Unerwarteter Fehler';
+  }
+
   async function onSave() {
     saveClicked = true;
     hasError = false;
@@ -31,7 +41,7 @@
         goto('/');
       } catch (err: any) {
         hasError = true;
-        status = 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+        status = getErrorMessage(err);
       }
     }
   }
