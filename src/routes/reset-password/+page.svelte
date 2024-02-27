@@ -31,7 +31,7 @@
         goto('/');
       } catch (err: any) {
         hasError = true;
-        status = 'Das Passwort muss mindestens 8 Zeichen lang sein, Groß- und Kleinbuchstaben, mindestens eine Ziffer und ein Sonderzeichen beinhalten.';
+        status = 'Das Passwort muss mindestens 8 Zeichen lang sein.';
       }
     }
   }

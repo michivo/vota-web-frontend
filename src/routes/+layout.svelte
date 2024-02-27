@@ -12,13 +12,18 @@
   import { UserService } from '../services/userService';
   import { page } from '$app/stores';
 
+  let isAnonymousRoute = false;
   const userService = new UserService();
+  const anonymousRoutes = ['/reset-password'];
 
   $: homeLink = $userStore?.isLoggedIn ? '/dashboard' : '/';
+  $: anonymous = !!anonymousRoutes.find(r => $page.url.pathname.startsWith(r));
 
   if (browser) {
+    isAnonymousRoute = !!anonymousRoutes.find((r) => window.location.pathname.startsWith(r));
+
     userStore.subscribe((state) => {
-      if (!state.isLoggedIn) {
+      if (!state.isLoggedIn && !isAnonymousRoute) {
         goto('/');
       }
     });
@@ -29,7 +34,7 @@
   <div class="container-fluid">
     <a class="navbar-brand me-4" href={homeLink}
       ><img src="/faviconxl.png" height="192" width="192" alt="" class="logo me-3" />VOTA Web</a>
-    {#if $userStore?.isLoggedIn}
+      {#if $userStore?.isLoggedIn && !anonymous}
       <button
         class="navbar-toggler"
         type="button"

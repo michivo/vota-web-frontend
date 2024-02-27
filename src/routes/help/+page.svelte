@@ -8,7 +8,7 @@
     Benutzer*innen kann ein Passwort angegeben werden. Wenn <em>kein</em> Passwort angegeben wird,
     <em>muss</em> eine E-Mail-Adresse angegeben werden. An diese E-Mail-Adresse wird ein Link gesendet,
     über den ein Passwort gesetzt werden kann. Das Passwort muss in jedem Fall Mindestanforderungen entsprechen
-    (mindestens 8 Zeichen, darunter Groß- und Kleinbuchstaben, mindestens eine Ziffer und ein Sonderzeichen).
+    (mindestens 8 Zeichen).
   </p>
   <p>
     <b>Standardbenutzer*innen</b> dürfen nur Stimmen erfassen, haben sonst keine Berechtigungen.
