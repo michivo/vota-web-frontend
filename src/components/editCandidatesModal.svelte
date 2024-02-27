@@ -52,6 +52,7 @@
       try {
         const electionWithCandidates = await electionApi.getElectionWithCandidates(election?.id);
         candidates = electionWithCandidates.candidates;
+        candidates = candidates.sort((c1, c2) => c1.ballotOrder - c2.ballotOrder);
       } finally {
         loading = false;
       }
@@ -193,7 +194,8 @@
   }
 
   .order-col {
-    width: 5rem;
+    width: 6rem;
+    text-align: right;
   }
 
   .actions-col {
