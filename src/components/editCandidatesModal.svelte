@@ -73,6 +73,7 @@
 
   function removeCandidate(candidateIndex: number) {
     candidates.splice(candidateIndex, 1);
+    candidates.forEach((c, i) => c.ballotOrder = i + 1);
     candidates = candidates;
   }
 
