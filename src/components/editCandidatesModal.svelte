@@ -73,7 +73,7 @@
 
   function removeCandidate(candidateIndex: number) {
     candidates.splice(candidateIndex, 1);
-    candidates.forEach((c, i) => c.ballotOrder = i + 1);
+    candidates.forEach((c, i) => (c.ballotOrder = i + 1));
     candidates = candidates;
   }
 
@@ -113,7 +113,9 @@
         </thead>
         <tbody>
           {#each candidates as candidate, candidateIndex}
-            <tr>
+            <tr
+              class:female={candidate.gender === Gender.Female}
+              class:male={candidate.gender === Gender.Male}>
               <td class="order-col"
                 >{candidate.ballotOrder}
                 {#if !isReadOnly}
@@ -201,5 +203,24 @@
 
   .actions-col {
     width: 7rem;
+  }
+
+  tr.female {
+    border-left: 5px solid var(--bs-primary);
+    border-right: 5px solid var(--bs-primary);
+    font-weight: bold;
+  }
+
+  tr.female input, tr.female select {
+    font-weight: bold;
+  }
+
+  tr.male {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+  }
+
+  tr td {
+    vertical-align: middle;
   }
 </style>
