@@ -93,7 +93,7 @@
   function editElection(election: ElectionDto) {
     isNewElection = false;
     isReadOnly = false;
-    electionToEdit = election;
+    electionToEdit = {...election};
   }
 
   function viewSettings(election: ElectionDto) {
@@ -111,6 +111,9 @@
       if (isNewElection) {
         await electionApi.createElection(election);
       }
+      else {
+        await electionApi.updateElection(election);
+      }
     } catch {
       electionToEdit = event.detail;
       hasError = true;
@@ -121,7 +124,7 @@
   }
 
   function editCandidates(election: ElectionDto): void {
-    electionToEditCandidates = election;
+    electionToEditCandidates = {...election};
     isReadOnly = false;
     showCandidatesModal = true;
   }
