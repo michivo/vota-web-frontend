@@ -119,6 +119,7 @@
   ];
 
   $: selected = board[1].items;
+  $: submitDisabled = !ballotStationName;
 
   let originalList = [] as CandidateDto[];
 
@@ -383,8 +384,18 @@
       {/each}
     </div>
   {/if}
-  <Button color="primary" size="lg" class="w-100" on:click={showConfirmationModal}
-    >Stimmzettel erfassen</Button>
+  <Button 
+    color="primary" 
+    size="lg" 
+    class="w-100"
+    bind:disabled={submitDisabled}
+    on:click={showConfirmationModal}
+  >
+    Stimmzettel erfassen
+  </Button>
+  {#if submitDisabled}
+  <p class="w-100 text-center">Um Stimmzettel erfassen zu können, muss ein Name für die Zählstelle angegeben werden</p>
+  {/if}
   <Modal isOpen={showConfirmation} toggle={cancel}>
     <ModalHeader toggle={cancel}>Stimme überprüfen</ModalHeader>
     <ModalBody>
