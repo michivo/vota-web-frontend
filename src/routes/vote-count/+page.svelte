@@ -36,7 +36,7 @@
   import type { User } from '../../types/userState';
   import { BallotApi } from '../../services/ballotApi';
   import type { ApiError } from '../../types/api/apiError';
-    import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation';
 
   const flipDurationMs = 200;
   const localStorageKey = 'vote-count-settings';
@@ -51,7 +51,8 @@
   let errorMessage = '';
   let stationSettingsOpen = true;
   let ballotValid = true;
-  let confirmClose = false;  
+  let confirmClose = false;
+  let ballotNotes = '';
 
   const unsubscribeUser = userStore.subscribe(
     (val) => (currentUser = val.isLoggedIn ? val.user : undefined)
@@ -72,20 +73,22 @@
 
   function tryLoadPreviousSettings() {
     const previousSettings = localStorage.getItem(localStorageKey);
-    if(previousSettings) {
+    if (previousSettings) {
       try {
-        const settings: { electionId: number, ballotIdentifier: string, ballotStationName: string, additionalPeople: string } = 
-          JSON.parse(previousSettings);
-        if(settings.electionId === electionId) {
+        const settings: {
+          electionId: number;
+          ballotIdentifier: string;
+          ballotStationName: string;
+          additionalPeople: string;
+        } = JSON.parse(previousSettings);
+        if (settings.electionId === electionId) {
           ballotIdentifier = settings.ballotIdentifier;
           ballotStationName = settings.ballotStationName;
           additionalPeople = settings.additionalPeople;
-        }
-        else {
+        } else {
           localStorage.removeItem(localStorageKey);
         }
-      }
-      catch(err) {
+      } catch (err) {
         console.error('Error loading previous settings');
         console.error(err);
         localStorage.removeItem(localStorageKey);
@@ -198,7 +201,7 @@
         countingUserId: currentUser!.id,
         electionId: electionId,
         countingUserName: currentUser!.displayName || currentUser?.name || '',
-        notes: '',
+        notes: ballotNotes,
         isValid: ballotValid && selected.length > 0,
         dateCreated: new Date(),
         id: 0,
@@ -211,7 +214,7 @@
           ballotOrder: index + 1,
           order: index + 1
         })),
-        canDelete: true,
+        canDelete: true
       };
       const ballotApi = new BallotApi();
       await ballotApi.addBallot(ballot);
@@ -225,6 +228,7 @@
       board[0].items = [...originalList];
       board[1].items = [];
       ballotIdentifier = getNextIdentifier();
+      ballotNotes = '';
       updateStoredSettings();
       ballotValid = true;
     } catch (error: unknown) {
@@ -264,10 +268,9 @@
   }
 
   function closeCounting() {
-    if(board[1].items.length) {
+    if (board[1].items.length) {
       confirmClose = true;
-    }
-    else {
+    } else {
       goto('/dashboard');
     }
   }
@@ -329,9 +332,11 @@
       </FormGroup>
     </div>
     <div class="col-4 pt-2">
-      <Button color="secondary" class="mt-4 w-100" on:click="{closeCounting}">Erfassung abschließen</Button>
+      <Button color="secondary" class="mt-4 w-100" on:click={closeCounting}
+        >Erfassung abschließen</Button>
       <div>
-        <small>Die Erfassung kann später fortgesetzt werden, solange die Auszählung nicht von der
+        <small
+          >Die Erfassung kann später fortgesetzt werden, solange die Auszählung nicht von der
           Wahlleitung beendet wurde</small>
       </div>
     </div>
@@ -384,17 +389,27 @@
       {/each}
     </div>
   {/if}
-  <Button 
-    color="primary" 
-    size="lg" 
+  <FormGroup>
+    <input
+      type="text"
+      class="form-control form-control-lg"
+      bind:value={ballotNotes}
+      placeholder="Notizen/Anmerkungen zum Stimmzettel"
+      aria-label="Notizen/Anmerkungen zum Stimmzettel"
+      id="ballotNotes" />
+  </FormGroup>
+  <Button
+    color="primary"
+    size="lg"
     class="w-100"
     bind:disabled={submitDisabled}
-    on:click={showConfirmationModal}
-  >
+    on:click={showConfirmationModal}>
     Stimmzettel erfassen
   </Button>
   {#if submitDisabled}
-  <p class="w-100 text-center">Um Stimmzettel erfassen zu können, muss ein Name für die Zählstelle angegeben werden</p>
+    <p class="w-100 text-center">
+      Um Stimmzettel erfassen zu können, muss ein Name für die Zählstelle angegeben werden
+    </p>
   {/if}
   <Modal isOpen={showConfirmation} toggle={cancel}>
     <ModalHeader toggle={cancel}>Stimme überprüfen</ModalHeader>
@@ -421,6 +436,11 @@
           Sie haben keine Reihung eingegeben - der Stimmzettel wird als <b>ungültige Stimme</b> erfasst.
         </p>
       {/if}
+      {#if ballotNotes?.trim()}
+        <p>
+          Notizen: {ballotNotes}
+        </p>
+      {/if}
     </ModalBody>
     <ModalFooter>
       <Button color="primary" on:click={submitVote}>Bestätigen</Button>
@@ -428,16 +448,17 @@
     </ModalFooter>
   </Modal>
 
-  <Modal isOpen={!!confirmClose} toggle={() => confirmClose = false}>
-    <ModalHeader toggle={() => confirmClose = false}>Erfassung abschließen?</ModalHeader>
+  <Modal isOpen={!!confirmClose} toggle={() => (confirmClose = false)}>
+    <ModalHeader toggle={() => (confirmClose = false)}>Erfassung abschließen?</ModalHeader>
     <ModalBody>
-      Der aktuelle Stimmzettel wurde noch nicht erfasst. Sind Sie sicher, dass Sie die Erfassung abschließen wollen?
+      Der aktuelle Stimmzettel wurde noch nicht erfasst. Sind Sie sicher, dass Sie die Erfassung
+      abschließen wollen?
     </ModalBody>
     <ModalFooter>
       <Button color="primary" on:click={() => (confirmClose = false)}>Nein</Button>
       <Button color="danger" on:click={() => goto('/dashboard')}>Ja</Button>
     </ModalFooter>
-  </Modal>  
+  </Modal>
 
   <Modal isOpen={!!errorMessage} toggle={() => (errorMessage = '')}>
     <ModalHeader toggle={() => (errorMessage = '')}>Fehler beim Erfassen der Stimme</ModalHeader>
