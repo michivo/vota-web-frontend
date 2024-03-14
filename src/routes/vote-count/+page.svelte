@@ -394,7 +394,7 @@
       type="text"
       class="form-control form-control-lg"
       bind:value={ballotNotes}
-      placeholder="Notizen/Anmerkungen zum Stimmzettel"
+      placeholder="Notizen/Anmerkungen zum Stimmzettel (optional)"
       aria-label="Notizen/Anmerkungen zum Stimmzettel"
       id="ballotNotes" />
   </FormGroup>
