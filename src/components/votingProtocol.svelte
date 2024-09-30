@@ -6,7 +6,7 @@
 </script>
 
 <template>
-  <div style={`margin-left: ${indentation + 1}rem`}>
+  <div class={`indented-${indentation + 1}`}>
     <ul>
       <li><em>{protocol.Title}</em></li>
       {#each protocol.Messages as message}
@@ -32,5 +32,21 @@
 
     .result-3 {
         font-size: 1.1rem;
+    }
+
+    .indented-1 {
+        margin-left: 1rem;
+    }
+
+    .indented-2 {
+        margin-left: 2rem;
+    }
+    
+    .indented-3 {
+        margin-left: 3rem;
+    }
+    
+    .indented-4 {
+        margin-left: 4rem;
     }
 </style>
