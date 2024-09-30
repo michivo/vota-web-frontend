@@ -153,7 +153,7 @@
             <td>{result.dateCreatedUtc.toLocaleString()}</td>
             <td>{getStatus(result)}
               {#if result.resultStatus === VotingResultStatus.Overridden}
-                <Button color="primary" size="sm" class="p-0 info-button" id={`buttonResultDetails${result.id}`}>
+                <Button color="primary" size="sm" class="p-0 lh-1" id={`buttonResultDetails${result.id}`}>
                   <Fa icon={faInfoCircle} />
                 </Button>
                 <Popover
@@ -278,9 +278,5 @@
 
   tr.valid {
     font-weight: 700;
-  }
-
-  .info-button {
-    line-height: 1rem;
   }
 </style>
