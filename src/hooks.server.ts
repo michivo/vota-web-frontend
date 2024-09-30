@@ -2,7 +2,7 @@ import type { Handle } from "@sveltejs/kit";
 
 const securityHeaders = {
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-    'Content-Security-Policy': 'default-src \'self\'',
+    'Content-Security-Policy': 'default-src \'self\'; unsafe-inline',
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
